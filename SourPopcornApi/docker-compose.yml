@@ -1,0 +1,50 @@
+version: '3.8'
+
+networks:
+    sourpopcorn-network:
+        driver: bridge
+
+services:
+    sourpopcorn-webapi:
+        image: docker.io/library/webapi
+        depends_on:
+            - "sourpopcorn-database"
+        container_name: webapi
+        ports:
+            - "8080:80"
+            - "8081:443"
+        build:
+            context: .
+            dockerfile: Dockerfile
+        environment:
+            - SourPopcornDatabase_HOST=sourpopcorn-database
+            - SourPopcornDatabase_PORT=5432
+            - SourPopcornDatabase_DATABASE=SourPopcorn
+            - SourPopcornDatabase_USERNAME=Damynas
+            - SourPopcornDatabase_PASSWORD=Test@123
+            - ASPNETCORE_URLS=http://+80;https://+443
+            - ASPNETCORE_HTTPS_PORT=8081
+            - ASPNETCORE_Kestrel__Certificates__Default__Password=Test@123
+            - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/sourpopcornapi.pfx
+        volumes:
+            - ${USERPROFILE}\.aspnet\https:/https/
+        networks:
+            - sourpopcorn-network
+    
+    sourpopcorn-database:
+        image: postgres:latest
+        container_name: database
+        environment:
+            - POSTGRES_USER=Damynas
+            - POSTGRES_PASSWORD=Test@123
+            - POSTGRES_DB=SourPopcorn
+        ports:
+            - "5433:5432"
+        restart: always
+        volumes:
+            - sourpopcorn-data:/var/lib/postgresql/data
+        networks:
+            - sourpopcorn-network
+
+volumes:
+    sourpopcorn-data:
