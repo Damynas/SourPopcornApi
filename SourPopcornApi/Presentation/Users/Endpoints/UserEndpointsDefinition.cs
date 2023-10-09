@@ -66,7 +66,7 @@ public static class UserEndpointsDefinition
         var request = new GetUserByIdRequest(userId);
         var result = await userService.GetUserByIdAsync(request, cancellationToken);
         if (result.IsFailure)
-            return result.Error == Error.NullValue ? TypedResults.NotFound() : TypedResults.Problem("Failed result error value is incorrect.");
+            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
             return TypedResults.Problem("Successfull result value cannot be null.");
@@ -99,7 +99,7 @@ public static class UserEndpointsDefinition
         var request = new UpdateUserRequest(userId, requestBody.DisplayName);
         var result = await userService.UpdateUserAsync(request, cancellationToken);
         if (result.IsFailure)
-            return result.Error == Error.NullValue ? TypedResults.NotFound() : TypedResults.Problem("Failed result error value is incorrect.");
+            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
             return TypedResults.Problem("Successfull result value cannot be null.");

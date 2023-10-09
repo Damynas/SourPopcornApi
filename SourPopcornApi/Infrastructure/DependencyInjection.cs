@@ -1,7 +1,15 @@
 ﻿using Application.Abstractions.Data;
+using Application.Directors.Abstractions;
+using Application.Movies.Abstractions;
+using Application.Ratings.Abstractions;
 using Application.Users.Abstractions;
+using Application.Votes.Abstractions;
+using Infrastructure.Directors;
+using Infrastructure.Movies;
+using Infrastructure.Ratings;
 using Infrastructure.Services;
 using Infrastructure.Users;
+using Infrastructure.Votes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +25,7 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options => options
             .UseNpgsql(connectionString)
             .UseCamelCaseNamingConvention()
+            .UseLazyLoadingProxies()
         );
 
         services.AddScoped<IApplicationDbContext>(serviceProvider => serviceProvider.GetRequiredService<ApplicationDbContext>());
@@ -24,6 +33,18 @@ public static class DependencyInjection
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserMapper, UserMapper>();
+
+        services.AddScoped<IDirectorRepository, DirectorRepository>();
+        services.AddScoped<IDirectorMapper, DirectorMapper>();
+
+        services.AddScoped<IMovieRepository, MovieRepository>();
+        services.AddScoped<IMovieMapper, MovieMapper>();
+
+        services.AddScoped<IRatingRepository, RatingRepository>();
+        services.AddScoped<IRatingMapper, RatingMapper>();
+
+        services.AddScoped<IVoteRepository, VoteRepository>();
+        services.AddScoped<IVoteMapper, VoteMapper>();
 
         return services;
     }

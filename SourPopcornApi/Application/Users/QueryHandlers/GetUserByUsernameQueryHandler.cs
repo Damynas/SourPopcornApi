@@ -12,7 +12,7 @@ public class GetUserByUsernameQueryHandler(IUserRepository userRepository) : IQu
     {
         var user = await userRepository.GetByUsernameAsync(query.Request.Username, cancellationToken);
         if (user is null)
-            return Result<User?>.Failure(null, Error.NullValue);
+            return Result<User?>.Failure(null, Error.NullValue("Specified user does not exist."));
 
         return Result<User?>.Success(user);
     }

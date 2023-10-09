@@ -1,4 +1,6 @@
-﻿namespace Domain.Shared;
+﻿using Domain.Shared.Constants;
+
+namespace Domain.Shared;
 
 /// <summary>
 /// Represents an error.
@@ -18,12 +20,12 @@ public class Error : IEquatable<Error>
     /// <summary>
     /// The null value error instance.
     /// </summary>
-    public static readonly Error NullValue = new() { Code = "Error.NullValue", Message = "The specified result value is null." };
+    public static Error NullValue(string message = "The specified result value is null.") => new() { Code = ErrorCode.NullValue, Message = message };
 
     /// <summary>
     /// The condition not met error instance.
     /// </summary>
-    public static readonly Error ConditionNotMet = new() { Code = "Error.ConditionNotMet", Message = "The specified condition was not met." };
+    public static Error ConditionNotMet(string message = "The specified condition was not met.") => new() { Code = ErrorCode.ConditionNotMet, Message = message };
 
     /// <summary>
     /// Gets the error code.

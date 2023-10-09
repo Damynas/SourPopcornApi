@@ -12,7 +12,7 @@ public class DeleteUserCommandHandler(IUserRepository userRepository, IUnitOfWor
     {
         var user = await userRepository.GetByIdAsync(command.Request.Id, cancellationToken);
         if (user is null)
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(Error.NullValue("Specified user does not exist."));
 
         user.ModifiedOn = DateTime.UtcNow;
         user.IsDeleted = true;
