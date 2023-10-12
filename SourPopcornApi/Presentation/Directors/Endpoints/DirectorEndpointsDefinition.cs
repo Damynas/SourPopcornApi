@@ -1,11 +1,7 @@
 ﻿using Application.Abstractions.Services;
 using Application.Directors.Abstractions;
-using Application.Movies.Abstractions;
-using Application.Ratings.Abstractions;
 using Domain.Directors.DataTransferObjects.Requests;
 using Domain.Directors.DataTransferObjects.Responses;
-using Domain.Movies.DataTransferObjects.Responses;
-using Domain.Ratings.DataTransferObjects.Responses;
 using Domain.Shared;
 using Domain.Shared.Constants;
 using Domain.Shared.Paging;
@@ -24,8 +20,6 @@ public static class DirectorEndpointsDefinition
 {
     private const string GetDirectors = "GetDirectors";
     private const string GetDirectorById = "GetDirectorById";
-    private const string GetDirectorMovies = "GetDirectorMovies";
-    private const string GetDirectorMovieRatings = "GetDirectorMovieRatings";
     private const string CreateDirector = "CreateDirector";
     private const string UpdateDirector = "UpdateDirector";
     private const string DeleteDirector = "DeleteDirector";
@@ -38,11 +32,7 @@ public static class DirectorEndpointsDefinition
             .WithName(GetDirectors);
         directors.MapGet("/directors/{directorId}", GetDirectorByIdAsync)
             .WithName(GetDirectorById);
-        directors.Map("/directors/{directorId}/movies", GetDirectorMoviesAsync)
-            .WithName(GetDirectorMovies);
-        directors.Map("/directors/{directorId}/movies/{movieId}/ratings", GetDirectorMovieRatingsAsync)
-            .WithName(GetDirectorMovieRatings);
-        directors.MapPost("/directors/new", CreateDirectorAsync)
+        directors.MapPost("/directors", CreateDirectorAsync)
             .WithName(CreateDirector)
             .AddEndpointFilter<CreateDirectorValidationFilter>();
         directors.MapPut("/directors/{directorId}", UpdateDirectorAsync)
@@ -89,48 +79,6 @@ public static class DirectorEndpointsDefinition
         return TypedResults.Ok(endpointResult);
     }
 
-    private static async Task<IResult> GetDirectorMoviesAsync(
-        [FromServices] IDirectorService directorService, [FromServices] IMovieMapper movieMapper,
-        [FromRoute] int directorId, CancellationToken cancellationToken = default)
-    {
-        var request = new GetDirectorByIdRequest(directorId);
-        var result = await directorService.GetDirectorByIdAsync(request, cancellationToken);
-        if (result.IsFailure)
-            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
-
-        if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
-
-        var response = movieMapper.ToResponses(result.Value.Movies.ToList());
-        var links = new List<Link>();
-        var endpointResult = new EndpointResult<ICollection<MovieResponse>>(response, links.ToList());
-
-        return TypedResults.Ok(endpointResult);
-    }
-
-    private static async Task<IResult> GetDirectorMovieRatingsAsync(
-        [FromServices] IDirectorService directorService, [FromServices] IRatingMapper ratingMapper,
-        [FromRoute] int directorId, [FromRoute] int movieId, CancellationToken cancellationToken = default)
-    {
-        var request = new GetDirectorByIdRequest(directorId);
-        var result = await directorService.GetDirectorByIdAsync(request, cancellationToken);
-        if (result.IsFailure)
-            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
-
-        if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
-
-        var movie = result.Value.Movies.AsEnumerable().SingleOrDefault(m => m.Id == movieId);
-        if (movie is null)
-            return TypedResults.NotFound("Specified movie does not exist.");
-
-        var response = ratingMapper.ToResponses(movie.Ratings.ToList());
-        var links = new List<Link>();
-        var endpointResult = new EndpointResult<ICollection<RatingResponse>>(response, links.ToList());
-
-        return TypedResults.Ok(endpointResult);
-    }
-
     private static async Task<IResult> CreateDirectorAsync(
         [FromServices] IDirectorService directorService, [FromServices] IDirectorMapper directorMapper, [FromServices] ILinkService linkService,
         [FromBody] CreateDirectorRequestBody requestBody, CancellationToken cancellationToken = default)
@@ -168,7 +116,10 @@ public static class DirectorEndpointsDefinition
         [FromServices] IDirectorService directorService, [FromRoute] int directorId, CancellationToken cancellationToken = default)
     {
         var request = new DeleteDirectorRequest(directorId);
-        await directorService.DeleteDirectorAsync(request, cancellationToken);
+        var result = await directorService.DeleteDirectorAsync(request, cancellationToken);
+        if (result.IsFailure)
+            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
+
         return TypedResults.NoContent();
     }
 

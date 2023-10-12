@@ -2,4 +2,4 @@
 
 namespace Domain.Users.DataTransferObjects.Requests;
 
-public sealed record DeleteUserRequest(int Id) : IRequest;
+public sealed record DeleteUserRequest(int UserId) : IRequest;

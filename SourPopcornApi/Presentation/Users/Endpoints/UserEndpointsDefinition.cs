@@ -31,7 +31,7 @@ public static class UserEndpointsDefinition
             .WithName(GetUsers);
         users.MapGet("/users/{userId}", GetUserByIdAsync)
             .WithName(GetUserById);
-        users.MapPost("/users/new", CreateUserAsync)
+        users.MapPost("/users", CreateUserAsync)
             .WithName(CreateUser)
             .AddEndpointFilter<CreateUserValidationFilter>();
         users.MapPut("/users/{userId}", UpdateUserAsync)
@@ -115,7 +115,10 @@ public static class UserEndpointsDefinition
         [FromServices] IUserService userService, [FromRoute] int userId, CancellationToken cancellationToken = default)
     {
         var request = new DeleteUserRequest(userId);
-        await userService.DeleteUserAsync(request, cancellationToken);
+        var result = await userService.DeleteUserAsync(request, cancellationToken);
+        if (result.IsFailure)
+            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
+
         return TypedResults.NoContent();
     }
 

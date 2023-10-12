@@ -11,7 +11,7 @@ public class UpdateUserCommandHandler(IUserRepository userRepository, IUnitOfWor
 {
     public async Task<Result<User?>> Handle(UpdateUserCommand command, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByIdAsync(command.Request.Id, cancellationToken);
+        var user = await userRepository.GetByIdAsync(command.Request.UserId, cancellationToken);
         if (user is null)
             return Result<User?>.Failure(null, Error.NullValue("Specified user does not exist."));
 

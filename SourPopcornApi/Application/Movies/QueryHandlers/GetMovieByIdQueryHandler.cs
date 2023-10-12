@@ -10,7 +10,7 @@ public class GetMovieByIdQueryHandler(IMovieRepository movieRepository) : IQuery
 {
     public async Task<Result<Movie?>> Handle(GetMovieByIdQuery query, CancellationToken cancellationToken)
     {
-        var movie = await movieRepository.GetByIdAsync(query.Request.Id, cancellationToken);
+        var movie = await movieRepository.GetByIdAsync(query.Request.MovieId, cancellationToken);
         if (movie is null)
             return Result<Movie?>.Failure(null, Error.NullValue("Specified movie does not exist."));
 

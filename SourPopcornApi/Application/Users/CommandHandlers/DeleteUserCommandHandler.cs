@@ -10,7 +10,7 @@ public class DeleteUserCommandHandler(IUserRepository userRepository, IUnitOfWor
 {
     public async Task<Result> Handle(DeleteUserCommand command, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByIdAsync(command.Request.Id, cancellationToken);
+        var user = await userRepository.GetByIdAsync(command.Request.UserId, cancellationToken);
         if (user is null)
             return Result.Failure(Error.NullValue("Specified user does not exist."));
 

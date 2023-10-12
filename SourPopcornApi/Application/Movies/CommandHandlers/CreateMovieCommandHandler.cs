@@ -8,7 +8,8 @@ using Domain.Shared;
 
 namespace Application.Movies.CommandHandlers;
 
-public class CreateMovieCommandHandler(IDirectorRepository directorRepository, IMovieRepository movieRepository, IUnitOfWork unitOfWork) : ICommandHandler<CreateMovieCommand, Movie?>
+public class CreateMovieCommandHandler(IDirectorRepository directorRepository, IMovieRepository movieRepository, IUnitOfWork unitOfWork)
+    : ICommandHandler<CreateMovieCommand, Movie?>
 {
     public async Task<Result<Movie?>> Handle(CreateMovieCommand command, CancellationToken cancellationToken)
     {

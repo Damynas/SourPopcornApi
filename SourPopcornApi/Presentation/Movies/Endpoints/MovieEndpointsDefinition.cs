@@ -27,11 +27,11 @@ public static class MovieEndpointsDefinition
     public static void AddMovieEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         var movies = endpointRouteBuilder.MapGroup("/api").WithTags("Movies");
-        movies.MapGet("/movies", GetMoviesAsync)
+        movies.MapGet("movies", GetMoviesAsync)
             .WithName(GetMovies);
         movies.MapGet("/movies/{movieId}", GetMovieByIdAsync)
             .WithName(GetMovieById);
-        movies.MapPost("/movies/new", CreateMovieAsync)
+        movies.MapPost("/movies", CreateMovieAsync)
             .WithName(CreateMovie)
             .AddEndpointFilter<CreateMovieValidationFilter>();
         movies.MapPut("/movies/{movieId}", UpdateMovieAsync)
@@ -72,7 +72,7 @@ public static class MovieEndpointsDefinition
             return TypedResults.Problem("Successfull result value cannot be null.");
 
         var response = movieMapper.ToResponse(result.Value);
-        var links = GenerateGetLinks(linkService, response.Id);
+        var links = GenerateGetLinks(linkService, movieId);
         var endpointResult = new EndpointResult<MovieResponse>(response, links.ToList());
 
         return TypedResults.Ok(endpointResult);
@@ -86,8 +86,8 @@ public static class MovieEndpointsDefinition
             requestBody.DirectorId, requestBody.Description, requestBody.Country, requestBody.Language, requestBody.ReleasedOn, requestBody.Writers, requestBody.Actors);
         var result = await movieService.CreateMovieAsync(request, cancellationToken);
         if (result.IsFailure)
-            return result.Error.Code == "Error.DirectorIsNull" ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
-        
+            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
+
         if (result.Value is null)
             return TypedResults.Problem("Successfull result value cannot be null.");
 
@@ -122,11 +122,14 @@ public static class MovieEndpointsDefinition
         [FromServices] IMovieService movieService, [FromRoute] int movieId, CancellationToken cancellationToken = default)
     {
         var request = new DeleteMovieRequest(movieId);
-        await movieService.DeleteMovieAsync(request, cancellationToken);
+        var result = await movieService.DeleteMovieAsync(request, cancellationToken);
+        if (result.IsFailure)
+            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
+
         return TypedResults.NoContent();
     }
 
-    private static IEnumerable<Link> GeneratePagedGetLinks(ILinkService linkService, bool hasPrevious, bool hasNext, int pageNumber, int pageSize)
+    private static IEnumerable<Link> GeneratePagedGetLinks(ILinkService linkService,bool hasPrevious, bool hasNext, int pageNumber, int pageSize)
     {
         if (hasPrevious)
             yield return linkService.Generate(GetMovies, new { pageNumber = pageNumber - 1, pageSize }, "self", "GET");

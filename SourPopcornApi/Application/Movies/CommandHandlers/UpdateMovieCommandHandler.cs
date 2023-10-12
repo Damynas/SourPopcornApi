@@ -8,17 +8,19 @@ using Domain.Shared;
 
 namespace Application.Movies.CommandHandlers;
 
-public class UpdateMovieCommandHandler(IDirectorRepository directorRepository, IMovieRepository movieRepository, IUnitOfWork unitOfWork) : ICommandHandler<UpdateMovieCommand, Movie?>
+public class UpdateMovieCommandHandler(IDirectorRepository directorRepository, IMovieRepository movieRepository, IUnitOfWork unitOfWork)
+    : ICommandHandler<UpdateMovieCommand, Movie?>
 {
     public async Task<Result<Movie?>> Handle(UpdateMovieCommand command, CancellationToken cancellationToken)
     {
-        var movie = await movieRepository.GetByIdAsync(command.Request.Id, cancellationToken);
+        var movie = await movieRepository.GetByIdAsync(command.Request.MovieId, cancellationToken);
         if (movie is null)
             return Result<Movie?>.Failure(null, Error.NullValue("Specified movie does not exist."));
 
         var director = await directorRepository.GetByIdAsync(command.Request.DirectorId, cancellationToken);
         if (director is null)
             return Result<Movie?>.Failure(null, Error.NullValue("Specified director does not exist."));
+
 
         movie.ModifiedOn = DateTime.UtcNow;
         movie.Director = director;

@@ -11,33 +11,33 @@ namespace Application.Ratings.Services;
 
 public class RatingService(ISender sender) : IRatingService
 {
-    public async Task<Result<PagedList<Rating>>> GetRatingsAsync(GetRatingsRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<PagedList<Rating>?>> GetMovieRatingsAsync(GetMovieRatingsRequest request, CancellationToken cancellationToken = default)
     {
-        var query = new GetRatingsQuery(request);
+        var query = new GetMovieRatingsQuery(request);
         return await sender.Send(query, cancellationToken);
     }
 
-    public async Task<Result<Rating?>> GetRatingByIdAsync(GetRatingByIdRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<Rating?>> GetMovieRatingByIdAsync(GetMovieRatingByIdRequest request, CancellationToken cancellationToken = default)
     {
-        var query = new GetRatingByIdQuery(request);
+        var query = new GetMovieRatingByIdQuery(request);
         return await sender.Send(query, cancellationToken);
     }
 
-    public async Task<Result<Rating?>> CreateRatingAsync(CreateRatingRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<Rating?>> CreateMovieRatingAsync(CreateMovieRatingRequest request, CancellationToken cancellationToken = default)
     {
-        var command = new CreateRatingCommand(request);
+        var command = new CreateMovieRatingCommand(request);
         return await sender.Send(command, cancellationToken);
     }
 
-    public async Task<Result<Rating?>> UpdateRatingAsync(UpdateRatingRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<Rating?>> UpdateMovieRatingAsync(UpdateMovieRatingRequest request, CancellationToken cancellationToken = default)
     {
-        var command = new UpdateRatingCommand(request);
+        var command = new UpdateMovieRatingCommand(request);
         return await sender.Send(command, cancellationToken);
     }
 
-    public async Task<Result> DeleteRatingAsync(DeleteRatingRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteMovieRatingAsync(DeleteMovieRatingRequest request, CancellationToken cancellationToken = default)
     {
-        var command = new DeleteRatingCommand(request);
+        var command = new DeleteMovieRatingCommand(request);
         return await sender.Send(command, cancellationToken);
     }
 }

@@ -2,4 +2,4 @@
 
 namespace Domain.Movies.DataTransferObjects.Requests;
 
-public sealed record GetMovieByIdRequest(int Id) : IRequest;
+public sealed record GetMovieByIdRequest(int MovieId) : IRequest;

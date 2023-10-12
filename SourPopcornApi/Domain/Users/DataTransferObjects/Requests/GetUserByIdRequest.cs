@@ -2,4 +2,4 @@
 
 namespace Domain.Users.DataTransferObjects.Requests;
 
-public sealed record GetUserByIdRequest(int Id) : IRequest;
+public sealed record GetUserByIdRequest(int UserId) : IRequest;

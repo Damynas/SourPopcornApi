@@ -11,7 +11,7 @@ public class UpdateDirectorCommandHandler(IDirectorRepository directorRepository
 {
     public async Task<Result<Director?>> Handle(UpdateDirectorCommand command, CancellationToken cancellationToken)
     {
-        var director = await directorRepository.GetByIdAsync(command.Request.Id, cancellationToken);
+        var director = await directorRepository.GetByIdAsync(command.Request.DirectorId, cancellationToken);
         if (director is null)
             return Result<Director?>.Failure(null, Error.NullValue("Specified director does not exist."));
 

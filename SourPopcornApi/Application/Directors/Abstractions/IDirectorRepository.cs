@@ -3,7 +3,4 @@ using Domain.Directors.Entities;
 
 namespace Application.Directors.Abstractions;
 
-public interface IDirectorRepository : IRepository<Director>
-{
-
-}
+public interface IDirectorRepository : IRepository<Director> { }

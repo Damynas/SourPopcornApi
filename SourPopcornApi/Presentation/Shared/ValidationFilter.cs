@@ -17,7 +17,7 @@ public class ValidationFilter<TEntity> : IEndpointFilter
 
             var validation = await validator.ValidateAsync(entity);
             if (!validation.IsValid)
-                return TypedResults.ValidationProblem(validation.ToDictionary());
+                return TypedResults.UnprocessableEntity(validation.ToDictionary());
         }
 
         return await next(context);

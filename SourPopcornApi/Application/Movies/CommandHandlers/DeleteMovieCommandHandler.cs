@@ -14,7 +14,7 @@ public class DeleteMovieCommandHandler(
 {
     public async Task<Result> Handle(DeleteMovieCommand command, CancellationToken cancellationToken)
     {
-        var movie = await movieRepository.GetByIdAsync(command.Request.Id, cancellationToken);
+        var movie = await movieRepository.GetByIdAsync(command.Request.MovieId, cancellationToken);
         if (movie is null)
             return Result.Failure(Error.NullValue("Specified movie does not exist."));
 

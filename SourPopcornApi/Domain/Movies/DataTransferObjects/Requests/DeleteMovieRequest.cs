@@ -2,4 +2,4 @@
 
 namespace Domain.Movies.DataTransferObjects.Requests;
 
-public sealed record DeleteMovieRequest(int Id) : IRequest;
+public sealed record DeleteMovieRequest(int MovieId) : IRequest;

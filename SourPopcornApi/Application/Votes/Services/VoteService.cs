@@ -11,33 +11,33 @@ namespace Application.Votes.Services;
 
 public class VoteService(ISender sender) : IVoteService
 {
-    public async Task<Result<PagedList<Vote>>> GetVotesAsync(GetVotesRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<PagedList<Vote>?>> GetMovieRatingVotesAsync(GetMovieRatingVotesRequest request, CancellationToken cancellationToken = default)
     {
-        var query = new GetVotesQuery(request);
+        var query = new GetMovieRatingVotesQuery(request);
         return await sender.Send(query, cancellationToken);
     }
 
-    public async Task<Result<Vote?>> GetVoteByIdAsync(GetVoteByIdRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<Vote?>> GetMovieRatingVoteByIdAsync(GetMovieRatingVoteByIdRequest request, CancellationToken cancellationToken = default)
     {
-        var query = new GetVoteByIdQuery(request);
+        var query = new GetMovieRatingVoteByIdQuery(request);
         return await sender.Send(query, cancellationToken);
     }
 
-    public async Task<Result<Vote?>> CreateVoteAsync(CreateVoteRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<Vote?>> CreateMovieRatingVoteAsync(CreateMovieRatingVoteRequest request, CancellationToken cancellationToken = default)
     {
-        var command = new CreateVoteCommand(request);
+        var command = new CreateMovieRatingVoteCommand(request);
         return await sender.Send(command, cancellationToken);
     }
 
-    public async Task<Result<Vote?>> UpdateVoteAsync(UpdateVoteRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<Vote?>> UpdateMovieRatingVoteAsync(UpdateMovieRatingVoteRequest request, CancellationToken cancellationToken = default)
     {
-        var command = new UpdateVoteCommand(request);
+        var command = new UpdateMovieRatingVoteCommand(request);
         return await sender.Send(command, cancellationToken);
     }
 
-    public async Task<Result> DeleteVoteAsync(DeleteVoteRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteMovieRatingVoteAsync(DeleteMovieRatingVoteRequest request, CancellationToken cancellationToken = default)
     {
-        var command = new DeleteVoteCommand(request);
+        var command = new DeleteMovieRatingVoteCommand(request);
         return await sender.Send(command, cancellationToken);
     }
 }

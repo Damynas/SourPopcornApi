@@ -10,7 +10,7 @@ public class GetUserByIdQueryHandler(IUserRepository userRepository) : IQueryHan
 {
     public async Task<Result<User?>> Handle(GetUserByIdQuery query, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByIdAsync(query.Request.Id, cancellationToken);
+        var user = await userRepository.GetByIdAsync(query.Request.UserId, cancellationToken);
         if (user is null)
             return Result<User?>.Failure(null, Error.NullValue("Specified user does not exist."));
 

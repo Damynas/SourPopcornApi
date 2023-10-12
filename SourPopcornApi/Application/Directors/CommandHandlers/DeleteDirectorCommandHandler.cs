@@ -15,7 +15,7 @@ public class DeleteDirectorCommandHandler(
 {
     public async Task<Result> Handle(DeleteDirectorCommand command, CancellationToken cancellationToken)
     {
-        var director = await directorRepository.GetByIdAsync(command.Request.Id, cancellationToken);
+        var director = await directorRepository.GetByIdAsync(command.Request.DirectorId, cancellationToken);
         if (director is null)
             return Result.Failure(Error.NullValue("Specified director does not exist."));
 

@@ -1,11 +1,12 @@
 ﻿using Application.Abstractions.Data;
+using Domain.Shared.Paging;
 using Domain.Votes.Entities;
 
 namespace Application.Votes.Abstractions;
 
 public interface IVoteRepository : IRepository<Vote>
 {
-    Task<List<Vote>> GetByRatingIdAsync(int ratingId, CancellationToken cancellationToken = default);
+    Task<PagedList<Vote>> GetRatingVotesAsync(int ratingId, SearchParameters searchParameters, CancellationToken cancellationToken = default);
 
-    Task<List<Vote>> GetByCreatorIdAsync(int creatorId, CancellationToken cancellationToken = default);
+    Task<Vote?> GetRatingVoteByIdAsync(int ratingId, int voteId, CancellationToken cancellationToken = default);
 }
