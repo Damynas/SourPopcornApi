@@ -10,7 +10,7 @@ public static class WebApiExtensions
     {
         builder.Services
             .AddApplication()
-            .AddInfrastructure()
+            .AddInfrastructure(builder.Environment, builder.Configuration)
             .AddPresentation();
     }
 

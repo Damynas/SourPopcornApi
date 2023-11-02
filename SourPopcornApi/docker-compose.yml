@@ -17,15 +17,16 @@ services:
             context: .
             dockerfile: Dockerfile
         environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_URLS=http://+80;https://+443
+            - ASPNETCORE_HTTPS_PORT=8081
+            - ASPNETCORE_Kestrel__Certificates__Default__Password=Test@123
+            - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/sourpopcornapi.pfx
             - SourPopcornDatabase_HOST=sourpopcorn-database
             - SourPopcornDatabase_PORT=5432
             - SourPopcornDatabase_DATABASE=SourPopcorn
             - SourPopcornDatabase_USERNAME=Damynas
             - SourPopcornDatabase_PASSWORD=Test@123
-            - ASPNETCORE_URLS=http://+80;https://+443
-            - ASPNETCORE_HTTPS_PORT=8081
-            - ASPNETCORE_Kestrel__Certificates__Default__Password=Test@123
-            - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/sourpopcornapi.pfx
         volumes:
             - ${USERPROFILE}\.aspnet\https:/https/
         networks:
@@ -39,7 +40,7 @@ services:
             - POSTGRES_PASSWORD=Test@123
             - POSTGRES_DB=SourPopcorn
         ports:
-            - "5433:5432"
+            - "5432:5432"
         restart: always
         volumes:
             - sourpopcorn-data:/var/lib/postgresql/data
