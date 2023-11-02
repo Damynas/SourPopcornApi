@@ -33,6 +33,7 @@ public static class DependencyInjection
             .UseCamelCaseNamingConvention()
             .UseLazyLoadingProxies()
         );
+        Console.WriteLine("Successfully connected to a database");
 
         services.AddScoped<IApplicationDbContext>(serviceProvider => serviceProvider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ApplicationDbContext>());
@@ -57,7 +58,9 @@ public static class DependencyInjection
 
     public static WebApplication RunDatabaseMigration(this WebApplication app)
     {
+        Console.WriteLine("Starting a database migration...");
         DatabaseManagementService.MigrationInitialization(app);
+        Console.WriteLine("Successfully migrated the database");
 
         return app;
     }
