@@ -22,6 +22,9 @@ public class CreateMovieRatingVoteCommandHandler(
         if (rating is null)
             return Result<Vote?>.Failure(null, Error.NullValue("Specified rating does not exist for specified movie."));
 
+        if (rating.Votes.FirstOrDefault(vote => vote.CreatorId == command.Request.CreatorId) is not null)
+            return Result<Vote?>.Failure(null, Error.Conflict("You cannot vote on the same rating more than once."));
+
         var vote = new Vote(default, DateTime.UtcNow, DateTime.UtcNow)
         {
             CreatorId = command.Request.CreatorId,

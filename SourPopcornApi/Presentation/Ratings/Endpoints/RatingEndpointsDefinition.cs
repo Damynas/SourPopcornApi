@@ -101,7 +101,12 @@ public static class RatingEndpointsDefinition
         var request = new CreateMovieRatingRequest(userId.Value, movieId, requestBody.SourPopcorns, requestBody.Comment);
         var result = await ratingService.CreateMovieRatingAsync(request, cancellationToken);
         if (result.IsFailure)
-            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
+            return result.Error.Code switch
+            {
+                ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
+                ErrorCode.Conflict => TypedResults.Conflict(result.Error.Message),
+                _ => TypedResults.Problem("Failed result error value is incorrect.")
+            };
 
         if (result.Value is null)
             return TypedResults.Problem("Successfull result value cannot be null.");

@@ -18,6 +18,9 @@ public class CreateMovieRatingCommandHandler(
         if (movie is null)
             return Result<Rating?>.Failure(null, Error.NullValue("Specified movie does not exist."));
 
+        if (movie.Ratings.FirstOrDefault(vote => vote.CreatorId == command.Request.CreatorId) is not null)
+            return Result<Rating?>.Failure(null, Error.Conflict("You cannot create a rating on the same movie more than once."));
+
         var rating = new Rating(default, DateTime.UtcNow, DateTime.UtcNow)
         {
             CreatorId = command.Request.CreatorId,

@@ -11,12 +11,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Presentation.Auth.Services;
 using Presentation.Shared;
 using Presentation.Shared.Helpers;
 using Presentation.Votes.Constants;
 using Presentation.Votes.DataTransferObjects;
-using System.Net.Http;
 using System.Text.Json;
 
 namespace Presentation.Votes.Endpoints;
@@ -100,7 +98,12 @@ public static class VoteEndpointsDefinition
         var request = new CreateMovieRatingVoteRequest(userId.Value, movieId, ratingId, requestBody.IsPositive);
         var result = await voteService.CreateMovieRatingVoteAsync(request, cancellationToken);
         if (result.IsFailure)
-            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
+            return result.Error.Code switch
+            {
+                ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
+                ErrorCode.Conflict => TypedResults.Conflict(result.Error.Message),
+                _ => TypedResults.Problem("Failed result error value is incorrect.")
+            };
 
         if (result.Value is null)
             return TypedResults.Problem("Successfull result value cannot be null.");
