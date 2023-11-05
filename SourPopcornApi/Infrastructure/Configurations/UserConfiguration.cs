@@ -21,6 +21,7 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Username).IsRequired();
         builder.Property(u => u.PasswordHash).IsRequired();
         builder.Property(u => u.DisplayName).IsRequired();
+        builder.Property(u => u.ForceLogin).IsRequired();
 
         builder
             .HasMany(r => r.Ratings)

@@ -8,7 +8,7 @@ public class UserMapper : IUserMapper
 {
     public UserResponse ToResponse(User user)
     {
-        return new UserResponse(user.Id, user.CreatedOn, user.ModifiedOn, user.Username, user.DisplayName);
+        return new UserResponse(user.Id, user.CreatedOn, user.ModifiedOn, user.Username, user.DisplayName, user.Roles);
     }
 
     public ICollection<UserResponse> ToResponses(ICollection<User> users)

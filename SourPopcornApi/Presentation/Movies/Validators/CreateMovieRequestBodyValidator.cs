@@ -3,9 +3,9 @@ using Presentation.Movies.DataTransferObjects;
 
 namespace Presentation.Movies.Validators;
 
-public class UpdateMovieRequestValidator : AbstractValidator<UpdateMovieRequestBody>
+public class CreateMovieRequestBodyValidator : AbstractValidator<CreateMovieRequestBody>
 {
-    public UpdateMovieRequestValidator()
+    public CreateMovieRequestBodyValidator()
     {
         RuleFor(x => x.Description)
             .NotEmpty().WithMessage("Description is required.")

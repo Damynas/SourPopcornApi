@@ -1,7 +1,10 @@
 ﻿using Application.Abstractions.Services;
+using Application.Auth.Abstractions;
 using FluentValidation;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Presentation.Auth.Endpoints;
+using Presentation.Auth.Services;
 using Presentation.Directors.Endpoints;
 using Presentation.Movies.Endpoints;
 using Presentation.Ratings.Endpoints;
@@ -20,18 +23,20 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
 
         services.AddScoped<ILinkService, LinkService>();
+        services.AddScoped<ITokenService, TokenService>();
 
         return services;
     }
 
-    public static WebApplication AddEndpoints(this WebApplication app)
+    public static IEndpointRouteBuilder AddEndpoints(this IEndpointRouteBuilder routeBuilder)
     {
-        app.AddUserEndpoints();
-        app.AddDirectorEndpoints();
-        app.AddMovieEndpoints();
-        app.AddRatingEndpoints();
-        app.AddVoteEndpoints();
+        routeBuilder.AddAuthEndpoints();
+        routeBuilder.AddUserEndpoints();
+        routeBuilder.AddDirectorEndpoints();
+        routeBuilder.AddMovieEndpoints();
+        routeBuilder.AddRatingEndpoints();
+        routeBuilder.AddVoteEndpoints();
 
-        return app;
+        return routeBuilder;
     }
 }

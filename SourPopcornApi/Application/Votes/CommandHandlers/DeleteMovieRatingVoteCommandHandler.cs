@@ -3,6 +3,7 @@ using Application.Abstractions.Messaging;
 using Application.Movies.Abstractions;
 using Application.Votes.Abstractions;
 using Application.Votes.Commands;
+using Domain.Auth.Constants;
 using Domain.Shared;
 
 namespace Application.Votes.CommandHandlers;
@@ -23,6 +24,9 @@ public class DeleteMovieRatingVoteCommandHandler(IMovieRepository movieRepositor
         var vote = rating.Votes.AsEnumerable().SingleOrDefault(x => x.Id == command.Request.VoteId);
         if (vote is null)
             return Result.Failure(Error.NullValue("Specified vote does not exist for specified rating."));
+
+        if (command.Request.UserId != rating.CreatorId && !command.Request.Roles.Contains(Role.Moderator))
+            return Result.Failure(Error.Forbidden("You are not allowed to delete another user's vote."));
 
         vote.ModifiedOn = DateTime.UtcNow;
         vote.IsDeleted = true;

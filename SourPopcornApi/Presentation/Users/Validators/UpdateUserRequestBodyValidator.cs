@@ -3,9 +3,9 @@ using Presentation.Users.DataTransferObjects;
 
 namespace Presentation.Users.Validators;
 
-public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequestBody>
+public class UpdateUserRequestBodyValidator : AbstractValidator<UpdateUserRequestBody>
 {
-    public UpdateUserRequestValidator()
+    public UpdateUserRequestBodyValidator()
     {
         RuleFor(x => x.DisplayName)
             .NotEmpty().WithMessage("Display name is required.")

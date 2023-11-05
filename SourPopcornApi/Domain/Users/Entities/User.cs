@@ -14,8 +14,9 @@ public class User(int id, DateTime createdOn, DateTime modifiedOn, bool isDelete
 
     public required List<string> Roles { get; set; }
 
-    // Navigation properties
+    public required bool ForceLogin { get; set; }
 
+    // Navigation properties
     public virtual ICollection<Rating> Ratings { get; } = new List<Rating>();
 
     public virtual ICollection<Vote> Votes { get; } = new List<Vote>();

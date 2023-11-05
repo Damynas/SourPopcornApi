@@ -13,4 +13,6 @@ public interface IUserService
     Task<Result<User>> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default);
     Task<Result<User?>> UpdateUserAsync(UpdateUserRequest request, CancellationToken cancellationToken = default);
     Task<Result> DeleteUserAsync(DeleteUserRequest request, CancellationToken cancellationToken = default);
+    Task<Result> AssignRoleAsync(ManageRolesRequest request, CancellationToken cancellationToken = default);
+    Task<Result> UnassignRoleAsync(ManageRolesRequest request, CancellationToken cancellationToken = default);
 }

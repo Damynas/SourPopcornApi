@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Services;
 using Application.Directors.Abstractions;
+using Domain.Auth.Constants;
 using Domain.Directors.DataTransferObjects.Requests;
 using Domain.Directors.DataTransferObjects.Responses;
 using Domain.Shared;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Directors.Constants;
 using Presentation.Directors.DataTransferObjects;
 using Presentation.Directors.Filters;
 using Presentation.Shared;
@@ -18,28 +20,27 @@ namespace Presentation.Directors.Endpoints;
 
 public static class DirectorEndpointsDefinition
 {
-    private const string GetDirectors = "GetDirectors";
-    private const string GetDirectorById = "GetDirectorById";
-    private const string CreateDirector = "CreateDirector";
-    private const string UpdateDirector = "UpdateDirector";
-    private const string DeleteDirector = "DeleteDirector";
-
     public static void AddDirectorEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         var directors = endpointRouteBuilder.MapGroup("/api").WithTags("Directors");
 
         directors.MapGet("/directors", GetDirectorsAsync)
-            .WithName(GetDirectors);
+            .WithName(DirectorEndpointsName.GetDirectors)
+            .RequireAuthorization(Policy.UserOnly);
         directors.MapGet("/directors/{directorId}", GetDirectorByIdAsync)
-            .WithName(GetDirectorById);
+            .WithName(DirectorEndpointsName.GetDirectorById)
+            .RequireAuthorization(Policy.UserOnly);
         directors.MapPost("/directors", CreateDirectorAsync)
-            .WithName(CreateDirector)
-            .AddEndpointFilter<CreateDirectorValidationFilter>();
+            .WithName(DirectorEndpointsName.CreateDirector)
+            .AddEndpointFilter<CreateDirectorValidationFilter>()
+            .RequireAuthorization(Policy.ModeratorOnly);
         directors.MapPut("/directors/{directorId}", UpdateDirectorAsync)
-            .WithName(UpdateDirector)
-            .AddEndpointFilter<UpdateDirectorValidationFilter>();
+            .WithName(DirectorEndpointsName.UpdateDirector)
+            .AddEndpointFilter<UpdateDirectorValidationFilter>()
+            .RequireAuthorization(Policy.ModeratorOnly);
         directors.MapDelete("/directors/{directorId}", DeleteDirectorAsync)
-            .WithName(DeleteDirector);
+            .WithName(DirectorEndpointsName.DeleteDirector)
+            .RequireAuthorization(Policy.ModeratorOnly);
     }
 
     private static async Task<IResult> GetDirectorsAsync(HttpContext httpContext,
@@ -90,7 +91,7 @@ public static class DirectorEndpointsDefinition
         var links = GenerateCreateLinks(linkService, response.Id);
         var endpointResult = new EndpointResult<DirectorResponse>(response, links.ToList());
 
-        return TypedResults.CreatedAtRoute(endpointResult, GetDirectorById, new { directorId = response.Id });
+        return TypedResults.CreatedAtRoute(endpointResult, DirectorEndpointsName.GetDirectorById, new { directorId = response.Id });
     }
 
     private static async Task<IResult> UpdateDirectorAsync(
@@ -126,27 +127,27 @@ public static class DirectorEndpointsDefinition
     private static IEnumerable<Link> GeneratePagedGetLinks(ILinkService linkService, bool hasPrevious, bool hasNext, int pageNumber, int pageSize)
     {
         if (hasPrevious)
-            yield return linkService.Generate(GetDirectors, new { pageNumber = pageNumber - 1, pageSize }, "self", "GET");
+            yield return linkService.Generate(DirectorEndpointsName.GetDirectors, new { pageNumber = pageNumber - 1, pageSize }, "self", "GET");
         if (hasNext)
-            yield return linkService.Generate(GetDirectors, new { pageNumber = pageNumber + 1, pageSize }, "self", "GET");
+            yield return linkService.Generate(DirectorEndpointsName.GetDirectors, new { pageNumber = pageNumber + 1, pageSize }, "self", "GET");
     }
 
     private static IEnumerable<Link> GenerateGetLinks(ILinkService linkService, int directorId)
     {
-        yield return linkService.Generate(UpdateDirector, new { directorId }, "self", "PUT");
-        yield return linkService.Generate(DeleteDirector, new { directorId }, "self", "DELETE");
+        yield return linkService.Generate(DirectorEndpointsName.UpdateDirector, new { directorId }, "self", "PUT");
+        yield return linkService.Generate(DirectorEndpointsName.DeleteDirector, new { directorId }, "self", "DELETE");
     }
 
     private static IEnumerable<Link> GenerateCreateLinks(ILinkService linkService, int directorId)
     {
-        yield return linkService.Generate(GetDirectorById, new { directorId }, "self", "GET");
-        yield return linkService.Generate(UpdateDirector, new { directorId }, "self", "PUT");
-        yield return linkService.Generate(DeleteDirector, new { directorId }, "self", "DELETE");
+        yield return linkService.Generate(DirectorEndpointsName.GetDirectorById, new { directorId }, "self", "GET");
+        yield return linkService.Generate(DirectorEndpointsName.UpdateDirector, new { directorId }, "self", "PUT");
+        yield return linkService.Generate(DirectorEndpointsName.DeleteDirector, new { directorId }, "self", "DELETE");
     }
 
     private static IEnumerable<Link> GenerateUpdateLinks(ILinkService linkService, int directorId)
     {
-        yield return linkService.Generate(GetDirectorById, new { directorId }, "self", "GET");
-        yield return linkService.Generate(DeleteDirector, new { directorId }, "self", "DELETE");
+        yield return linkService.Generate(DirectorEndpointsName.GetDirectorById, new { directorId }, "self", "GET");
+        yield return linkService.Generate(DirectorEndpointsName.DeleteDirector, new { directorId }, "self", "DELETE");
     }
 }

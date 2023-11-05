@@ -1,4 +1,5 @@
-﻿using Application.Directors.Abstractions;
+﻿using Application.Auth.Services;
+using Application.Directors.Abstractions;
 using Application.Directors.Services;
 using Application.Movies.Abstractions;
 using Application.Movies.Services;
@@ -21,6 +22,7 @@ public static class DependencyInjection
             configuration.RegisterServicesFromAssembly(ApplicationAssemblyReference.Assembly);
         });
 
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IDirectorService, DirectorService>();
         services.AddScoped<IMovieService, MovieService>();

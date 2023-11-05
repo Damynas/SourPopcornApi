@@ -3,9 +3,9 @@ using Presentation.Ratings.DataTransferObjects;
 
 namespace Presentation.Ratings.Validators;
 
-public class UpdateMovieRatingRequestValidator : AbstractValidator<UpdateMovieRatingRequestBody>
+public class CreateMovieRatingRequestBodyValidator : AbstractValidator<CreateMovieRatingRequestBody>
 {
-    public UpdateMovieRatingRequestValidator()
+    public CreateMovieRatingRequestBodyValidator()
     {
         RuleFor(x => x.SourPopcorns)
             .GreaterThanOrEqualTo(0).WithMessage("SourPopcorns must be an integer from 0 to 5.")

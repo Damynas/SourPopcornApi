@@ -13,7 +13,6 @@ using Infrastructure.Ratings;
 using Infrastructure.Services;
 using Infrastructure.Users;
 using Infrastructure.Votes;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,7 +32,6 @@ public static class DependencyInjection
             .UseCamelCaseNamingConvention()
             .UseLazyLoadingProxies()
         );
-        Console.WriteLine("Successfully connected to a database");
 
         services.AddScoped<IApplicationDbContext>(serviceProvider => serviceProvider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ApplicationDbContext>());
@@ -56,13 +54,11 @@ public static class DependencyInjection
         return services;
     }
 
-    public static WebApplication RunDatabaseMigration(this WebApplication app)
+    public static IServiceProvider RunDatabaseMigration(this IServiceProvider serviceProvider)
     {
-        Console.WriteLine("Starting a database migration...");
-        DatabaseManagementService.MigrationInitialization(app);
-        Console.WriteLine("Successfully migrated the database");
+        DatabaseManagementService.MigrationInitialization(serviceProvider);
 
-        return app;
+        return serviceProvider;
     }
 
     private static string GetDevelopmentConnectionString()
@@ -106,11 +102,11 @@ public static class DependencyInjection
         if (keyVaultUrl.Value is null || keyVaultTenantId.Value is null || keyVaultClientId.Value is null || keyVaultClientSecret.Value is null)
             throw new ArgumentException("Variables for a key vault connection are set incorrectly.");
 
-        var credential = new ClientSecretCredential(keyVaultTenantId.Value.ToString(), keyVaultClientId.Value.ToString(), keyVaultClientSecret.Value.ToString());
-        var client = new SecretClient(new Uri(keyVaultUrl.Value.ToString()), credential);
+        var credential = new ClientSecretCredential(keyVaultTenantId.Value, keyVaultClientId.Value, keyVaultClientSecret.Value);
+        var client = new SecretClient(new Uri(keyVaultUrl.Value), credential);
 
         configuration.AddAzureKeyVault(client, new AzureKeyVaultConfigurationOptions());
 
-        return client.GetSecret("ProdConnectionString").Value.Value.ToString();
+        return client.GetSecret("ProdConnectionString").Value.Value;
     }
 }

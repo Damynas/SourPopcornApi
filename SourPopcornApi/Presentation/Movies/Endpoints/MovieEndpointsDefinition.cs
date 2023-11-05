@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Services;
 using Application.Movies.Abstractions;
+using Domain.Auth.Constants;
 using Domain.Movies.DataTransferObjects.Requests;
 using Domain.Movies.DataTransferObjects.Responses;
 using Domain.Shared;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Movies.Constants;
 using Presentation.Movies.DataTransferObjects;
 using Presentation.Movies.Filters;
 using Presentation.Shared;
@@ -18,27 +20,26 @@ namespace Presentation.Movies.Endpoints;
 
 public static class MovieEndpointsDefinition
 {
-    private const string GetMovies = "GetMovies";
-    private const string GetMovieById = "GetMovieById";
-    private const string CreateMovie = "CreateMovie";
-    private const string UpdateMovie = "UpdateMovie";
-    private const string DeleteMovie = "DeleteMovie";
-
     public static void AddMovieEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         var movies = endpointRouteBuilder.MapGroup("/api").WithTags("Movies");
         movies.MapGet("movies", GetMoviesAsync)
-            .WithName(GetMovies);
+            .WithName(MovieEndpointsName.GetMovies)
+            .RequireAuthorization(Policy.UserOnly);
         movies.MapGet("/movies/{movieId}", GetMovieByIdAsync)
-            .WithName(GetMovieById);
+            .WithName(MovieEndpointsName.GetMovieById)
+            .RequireAuthorization(Policy.UserOnly);
         movies.MapPost("/movies", CreateMovieAsync)
-            .WithName(CreateMovie)
-            .AddEndpointFilter<CreateMovieValidationFilter>();
+            .WithName(MovieEndpointsName.CreateMovie)
+            .AddEndpointFilter<CreateMovieValidationFilter>()
+            .RequireAuthorization(Policy.ModeratorOnly);
         movies.MapPut("/movies/{movieId}", UpdateMovieAsync)
-            .WithName(UpdateMovie)
-            .AddEndpointFilter<UpdateMovieValidationFilter>();
+            .WithName(MovieEndpointsName.UpdateMovie)
+            .AddEndpointFilter<UpdateMovieValidationFilter>()
+            .RequireAuthorization(Policy.ModeratorOnly);
         movies.MapDelete("/movies/{movieId}", DeleteMovieAsync)
-            .WithName(DeleteMovie);
+            .WithName(MovieEndpointsName.DeleteMovie)
+            .RequireAuthorization(Policy.ModeratorOnly);
     }
 
     private static async Task<IResult> GetMoviesAsync(HttpContext httpContext,
@@ -95,7 +96,7 @@ public static class MovieEndpointsDefinition
         var links = GenerateCreateLinks(linkService, response.Id);
         var endpointResult = new EndpointResult<MovieResponse>(response, links.ToList());
 
-        return TypedResults.CreatedAtRoute(endpointResult, GetMovieById, new { movieId = response.Id });
+        return TypedResults.CreatedAtRoute(endpointResult, MovieEndpointsName.GetMovieById, new { movieId = response.Id });
     }
 
     private static async Task<IResult> UpdateMovieAsync(
@@ -132,27 +133,27 @@ public static class MovieEndpointsDefinition
     private static IEnumerable<Link> GeneratePagedGetLinks(ILinkService linkService,bool hasPrevious, bool hasNext, int pageNumber, int pageSize)
     {
         if (hasPrevious)
-            yield return linkService.Generate(GetMovies, new { pageNumber = pageNumber - 1, pageSize }, "self", "GET");
+            yield return linkService.Generate(MovieEndpointsName.GetMovies, new { pageNumber = pageNumber - 1, pageSize }, "self", "GET");
         if (hasNext)
-            yield return linkService.Generate(GetMovies, new { pageNumber = pageNumber + 1, pageSize }, "self", "GET");
+            yield return linkService.Generate(MovieEndpointsName.GetMovies, new { pageNumber = pageNumber + 1, pageSize }, "self", "GET");
     }
 
     private static IEnumerable<Link> GenerateGetLinks(ILinkService linkService, int movieId)
     {
-        yield return linkService.Generate(UpdateMovie, new { movieId }, "self", "PUT");
-        yield return linkService.Generate(DeleteMovie, new { movieId }, "self", "DELETE");
+        yield return linkService.Generate(MovieEndpointsName.UpdateMovie, new { movieId }, "self", "PUT");
+        yield return linkService.Generate(MovieEndpointsName.DeleteMovie, new { movieId }, "self", "DELETE");
     }
 
     private static IEnumerable<Link> GenerateCreateLinks(ILinkService linkService, int movieId)
     {
-        yield return linkService.Generate(GetMovieById, new { movieId }, "self", "GET");
-        yield return linkService.Generate(UpdateMovie, new { movieId }, "self", "PUT");
-        yield return linkService.Generate(DeleteMovie, new { movieId }, "self", "DELETE");
+        yield return linkService.Generate(MovieEndpointsName.GetMovieById, new { movieId }, "self", "GET");
+        yield return linkService.Generate(MovieEndpointsName.UpdateMovie, new { movieId }, "self", "PUT");
+        yield return linkService.Generate(MovieEndpointsName.DeleteMovie, new { movieId }, "self", "DELETE");
     }
 
     private static IEnumerable<Link> GenerateUpdateLinks(ILinkService linkService, int movieId)
     {
-        yield return linkService.Generate(GetMovieById, new { movieId }, "self", "GET");
-        yield return linkService.Generate(DeleteMovie, new { movieId }, "self", "DELETE");
+        yield return linkService.Generate(MovieEndpointsName.GetMovieById, new { movieId }, "self", "GET");
+        yield return linkService.Generate(MovieEndpointsName.DeleteMovie, new { movieId }, "self", "DELETE");
     }
 }

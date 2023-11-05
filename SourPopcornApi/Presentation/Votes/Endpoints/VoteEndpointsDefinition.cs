@@ -1,5 +1,7 @@
 ﻿using Application.Abstractions.Services;
+using Application.Auth.Abstractions;
 using Application.Votes.Abstractions;
+using Domain.Auth.Constants;
 using Domain.Shared;
 using Domain.Shared.Constants;
 using Domain.Shared.Paging;
@@ -10,6 +12,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared;
+using Presentation.Shared.Helpers;
+using Presentation.Votes.Constants;
 using Presentation.Votes.DataTransferObjects;
 using System.Text.Json;
 
@@ -17,25 +21,24 @@ namespace Presentation.Votes.Endpoints;
 
 public static class VoteEndpointsDefinition
 {
-    private const string GetMovieRatingVotes = "GetMovieRatingVotes";
-    private const string GetMovieRatingVoteById = "GetMovieRatingVoteById";
-    private const string CreateMovieRatingVote = "CreateMovieRatingVote";
-    private const string UpdateMovieRatingVote = "UpdateMovieRatingVote";
-    private const string DeleteMovieRatingVote = "DeleteMovieRatingVote";
-
     public static void AddVoteEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         var votes = endpointRouteBuilder.MapGroup("/api/movies/{movieId}/ratings/{ratingId}").WithTags("Votes");
         votes.MapGet("/votes", GetMovieRatingVotesAsync)
-            .WithName(GetMovieRatingVotes);
+            .WithName(VoteEndpointsName.GetMovieRatingVotes)
+            .RequireAuthorization(Policy.UserOnly);
         votes.MapGet("/votes/{voteId}", GetMovieRatingVoteByIdAsync)
-            .WithName(GetMovieRatingVoteById);
+            .WithName(VoteEndpointsName.GetMovieRatingVoteById)
+            .RequireAuthorization(Policy.UserOnly);
         votes.MapPost("/votes", CreateMovieRatingVoteAsync)
-            .WithName(CreateMovieRatingVote);
+            .WithName(VoteEndpointsName.CreateMovieRatingVote)
+            .RequireAuthorization(Policy.UserOnly);
         votes.MapPut("/votes/{voteId}", UpdateMovieRatingVoteAsync)
-            .WithName(UpdateMovieRatingVote);
+            .WithName(VoteEndpointsName.UpdateMovieRatingVote)
+            .RequireAuthorization(Policy.UserOnly);
         votes.MapDelete("/votes/{voteId}", DeleteMovieRatingVoteAsync)
-            .WithName(DeleteMovieRatingVote);
+            .WithName(VoteEndpointsName.DeleteMovieRatingVote)
+            .RequireAuthorization(Policy.UserOnly);
     }
 
     private static async Task<IResult> GetMovieRatingVotesAsync(HttpContext httpContext,
@@ -96,17 +99,34 @@ public static class VoteEndpointsDefinition
         var links = GenerateCreateLinks(linkService, movieId, ratingId, response.Id);
         var endpointResult = new EndpointResult<VoteResponse>(response, links.ToList());
 
-        return TypedResults.CreatedAtRoute(endpointResult, GetMovieRatingVoteById, new { voteId = response.Id });
+        return TypedResults.CreatedAtRoute(endpointResult, VoteEndpointsName.GetMovieRatingVoteById, new { voteId = response.Id });
     }
 
-    private static async Task<IResult> UpdateMovieRatingVoteAsync(
-        [FromServices] IVoteService voteService, [FromServices] IVoteMapper voteMapper, [FromServices] ILinkService linkService,
+    private static async Task<IResult> UpdateMovieRatingVoteAsync(HttpContext httpContext,
+        [FromServices] ITokenService tokenService, [FromServices] IVoteService voteService, [FromServices] IVoteMapper voteMapper, [FromServices] ILinkService linkService,
         [FromRoute] int movieId, [FromRoute] int ratingId, [FromRoute] int voteId, [FromBody] UpdateMovieRatingVoteRequestBody requestBody, CancellationToken cancellationToken = default)
     {
-        var request = new UpdateMovieRatingVoteRequest(movieId, ratingId, voteId, requestBody.IsPositive);
+        var accessToken = CookieHelper.GetCookie(httpContext, CookieName.AccessToken);
+        if (accessToken is null)
+            return TypedResults.UnprocessableEntity("Access token is not valid.");
+
+        var userId = tokenService.GetUserId(accessToken);
+        if (!userId.HasValue)
+            return TypedResults.UnprocessableEntity("Access token is not valid.");
+
+        var roles = tokenService.GetRoles(accessToken);
+        if (roles is null)
+            return TypedResults.UnprocessableEntity("Access token is not valid.");
+
+        var request = new UpdateMovieRatingVoteRequest(userId.Value, roles, movieId, ratingId, voteId, requestBody.IsPositive);
         var result = await voteService.UpdateMovieRatingVoteAsync(request, cancellationToken);
         if (result.IsFailure)
-            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
+            return result.Error.Code switch
+            {
+                ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
+                ErrorCode.Forbidden => TypedResults.UnprocessableEntity(result.Error.Message),
+                _ => TypedResults.Problem("Failed result error value is incorrect.")
+            };
 
         if (result.Value is null)
             return TypedResults.Problem("Successfull result value cannot be null.");
@@ -118,13 +138,31 @@ public static class VoteEndpointsDefinition
         return TypedResults.Ok(endpointResult);
     }
 
-    private static async Task<IResult> DeleteMovieRatingVoteAsync(
-        [FromRoute] int movieId, [FromRoute] int ratingId, [FromServices] IVoteService voteService, [FromRoute] int voteId, CancellationToken cancellationToken = default)
+    private static async Task<IResult> DeleteMovieRatingVoteAsync(HttpContext httpContext,
+        [FromServices] ITokenService tokenService, [FromServices] IVoteService voteService,
+        [FromRoute] int movieId, [FromRoute] int ratingId, [FromRoute] int voteId, CancellationToken cancellationToken = default)
     {
-        var request = new DeleteMovieRatingVoteRequest(movieId, ratingId, voteId);
+        var accessToken = CookieHelper.GetCookie(httpContext, CookieName.AccessToken);
+        if (accessToken is null)
+            return TypedResults.UnprocessableEntity("Access token is not valid.");
+
+        var userId = tokenService.GetUserId(accessToken);
+        if (!userId.HasValue)
+            return TypedResults.UnprocessableEntity("Access token is not valid.");
+
+        var roles = tokenService.GetRoles(accessToken);
+        if (roles is null)
+            return TypedResults.UnprocessableEntity("Access token is not valid.");
+
+        var request = new DeleteMovieRatingVoteRequest(userId.Value, roles, movieId, ratingId, voteId);
         var result = await voteService.DeleteMovieRatingVoteAsync(request, cancellationToken);
         if (result.IsFailure)
-            return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
+            return result.Error.Code switch
+            {
+                ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
+                ErrorCode.Forbidden => TypedResults.UnprocessableEntity(result.Error.Message),
+                _ => TypedResults.Problem("Failed result error value is incorrect.")
+            };
 
         return TypedResults.NoContent();
     }
@@ -132,27 +170,27 @@ public static class VoteEndpointsDefinition
     private static IEnumerable<Link> GeneratePagedGetLinks(ILinkService linkService, int movieId, int ratingId, bool hasPrevious, bool hasNext, int pageNumber, int pageSize)
     {
         if (hasPrevious)
-            yield return linkService.Generate(GetMovieRatingVotes, new { movieId, ratingId, pageNumber = pageNumber - 1, pageSize }, "self", "GET");
+            yield return linkService.Generate(VoteEndpointsName.GetMovieRatingVotes, new { movieId, ratingId, pageNumber = pageNumber - 1, pageSize }, "self", "GET");
         if (hasNext)
-            yield return linkService.Generate(GetMovieRatingVotes, new { movieId, ratingId, pageNumber = pageNumber + 1, pageSize }, "self", "GET");
+            yield return linkService.Generate(VoteEndpointsName.GetMovieRatingVotes, new { movieId, ratingId, pageNumber = pageNumber + 1, pageSize }, "self", "GET");
     }
 
     private static IEnumerable<Link> GenerateGetLinks(ILinkService linkService, int movieId, int ratingId, int voteId)
     {
-        yield return linkService.Generate(UpdateMovieRatingVote, new { movieId, ratingId, voteId }, "self", "PUT");
-        yield return linkService.Generate(DeleteMovieRatingVote, new { movieId, ratingId, voteId }, "self", "DELETE");
+        yield return linkService.Generate(VoteEndpointsName.UpdateMovieRatingVote, new { movieId, ratingId, voteId }, "self", "PUT");
+        yield return linkService.Generate(VoteEndpointsName.DeleteMovieRatingVote, new { movieId, ratingId, voteId }, "self", "DELETE");
     }
 
     private static IEnumerable<Link> GenerateCreateLinks(ILinkService linkService, int movieId, int ratingId, int voteId)
     {
-        yield return linkService.Generate(GetMovieRatingVoteById, new { movieId, ratingId, voteId }, "self", "GET");
-        yield return linkService.Generate(UpdateMovieRatingVote, new { movieId, ratingId, voteId }, "self", "PUT");
-        yield return linkService.Generate(DeleteMovieRatingVote, new { movieId, ratingId, voteId }, "self", "DELETE");
+        yield return linkService.Generate(VoteEndpointsName.GetMovieRatingVoteById, new { movieId, ratingId, voteId }, "self", "GET");
+        yield return linkService.Generate(VoteEndpointsName.UpdateMovieRatingVote, new { movieId, ratingId, voteId }, "self", "PUT");
+        yield return linkService.Generate(VoteEndpointsName.DeleteMovieRatingVote, new { movieId, ratingId, voteId }, "self", "DELETE");
     }
 
     private static IEnumerable<Link> GenerateUpdateLinks(ILinkService linkService, int movieId, int ratingId, int voteId)
     {
-        yield return linkService.Generate(GetMovieRatingVoteById, new { movieId, ratingId, voteId }, "self", "GET");
-        yield return linkService.Generate(DeleteMovieRatingVote, new { movieId, ratingId, voteId }, "self", "DELETE");
+        yield return linkService.Generate(VoteEndpointsName.GetMovieRatingVoteById, new { movieId, ratingId, voteId }, "self", "GET");
+        yield return linkService.Generate(VoteEndpointsName.DeleteMovieRatingVote, new { movieId, ratingId, voteId }, "self", "DELETE");
     }
 }

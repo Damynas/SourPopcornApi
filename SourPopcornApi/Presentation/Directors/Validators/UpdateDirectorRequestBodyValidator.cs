@@ -3,9 +3,9 @@ using Presentation.Directors.DataTransferObjects;
 
 namespace Presentation.Directors.Validators;
 
-public class CreateDirectorRequestValidator : AbstractValidator<CreateDirectorRequestBody>
+public class UpdateDirectorRequestBodyValidator : AbstractValidator<UpdateDirectorRequestBody>
 {
-    public CreateDirectorRequestValidator()
+    public UpdateDirectorRequestBodyValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required.")
@@ -13,6 +13,5 @@ public class CreateDirectorRequestValidator : AbstractValidator<CreateDirectorRe
         RuleFor(x => x.Country)
             .NotEmpty().WithMessage("Country is required.")
             .MaximumLength(20).WithMessage("Country cannot exceed 20 characters.");
-
     }
 }

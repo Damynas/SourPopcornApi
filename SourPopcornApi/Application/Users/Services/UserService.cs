@@ -46,4 +46,16 @@ public class UserService(ISender sender) : IUserService
         var command = new DeleteUserCommand(request);
         return await sender.Send(command, cancellationToken);
     }
+
+    public async Task<Result> AssignRoleAsync(ManageRolesRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new AssignRoleCommand(request);
+        return await sender.Send(command, cancellationToken);
+    }
+
+    public async Task<Result> UnassignRoleAsync(ManageRolesRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new UnassignRoleCommand(request);
+        return await sender.Send(command, cancellationToken);
+    }
 }

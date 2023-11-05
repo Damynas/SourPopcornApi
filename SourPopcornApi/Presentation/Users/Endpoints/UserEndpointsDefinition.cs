@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Services;
 using Application.Users.Abstractions;
+using Domain.Auth.Constants;
 using Domain.Shared;
 using Domain.Shared.Constants;
 using Domain.Shared.Paging;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared;
+using Presentation.Users.Constants;
 using Presentation.Users.DataTransferObjects;
 using Presentation.Users.Filters;
 using System.Text.Json;
@@ -18,27 +20,35 @@ namespace Presentation.Users.Endpoints;
 
 public static class UserEndpointsDefinition
 {
-    private const string GetUsers = "GetUsers";
-    private const string GetUserById = "GetUserById";
-    private const string CreateUser = "CreateUser";
-    private const string UpdateUser = "UpdateUser";
-    private const string DeleteUser = "DeleteUser";
-
     public static void AddUserEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         var users = endpointRouteBuilder.MapGroup("/api").WithTags("Users");
         users.MapGet("/users", GetUsersAsync)
-            .WithName(GetUsers);
+            .WithName(UserEndpointsName.GetUsers)
+            .RequireAuthorization(Policy.AdminOnly);
         users.MapGet("/users/{userId}", GetUserByIdAsync)
-            .WithName(GetUserById);
+            .WithName(UserEndpointsName.GetUserById)
+            .RequireAuthorization(Policy.AdminOnly);
         users.MapPost("/users", CreateUserAsync)
-            .WithName(CreateUser)
-            .AddEndpointFilter<CreateUserValidationFilter>();
+            .WithName(UserEndpointsName.CreateUser)
+            .AddEndpointFilter<CreateUserValidationFilter>()
+            .RequireAuthorization(Policy.AdminOnly);
         users.MapPut("/users/{userId}", UpdateUserAsync)
-            .WithName(UpdateUser)
-            .AddEndpointFilter<UpdateUserValidationFilter>();
+            .WithName(UserEndpointsName.UpdateUser)
+            .AddEndpointFilter<UpdateUserValidationFilter>()
+            .RequireAuthorization(Policy.AdminOnly);
         users.MapDelete("/users/{userId}", DeleteUserAsync)
-            .WithName(DeleteUser);
+            .WithName(UserEndpointsName.DeleteUser)
+            .RequireAuthorization(Policy.AdminOnly);
+
+        users.MapPost("/users/{userId}/assign_role", AssignRoleAsync)
+            .WithName(UserEndpointsName.AssignRole)
+            .AddEndpointFilter<ManageRolesValidationFilter>()
+            .RequireAuthorization(Policy.AdminOnly);
+        users.MapDelete("/users/{userId}/unassign_role", UnassignRoleAsync)
+            .WithName(UserEndpointsName.UnassignRole)
+            .AddEndpointFilter<ManageRolesValidationFilter>()
+            .RequireAuthorization(Policy.AdminOnly);
     }
 
     private static async Task<IResult> GetUsersAsync(HttpContext httpContext,
@@ -89,7 +99,7 @@ public static class UserEndpointsDefinition
         var links = GenerateCreateLinks(linkService, response.Id);
         var endpointResult = new EndpointResult<UserResponse>(response, links.ToList());
 
-        return TypedResults.CreatedAtRoute(endpointResult, GetUserById, new { userId = response.Id });
+        return TypedResults.CreatedAtRoute(endpointResult, UserEndpointsName.GetUserById, new { userId = response.Id });
     }
 
     private static async Task<IResult> UpdateUserAsync(
@@ -122,30 +132,92 @@ public static class UserEndpointsDefinition
         return TypedResults.NoContent();
     }
 
+    private static async Task<IResult> AssignRoleAsync(
+        [FromServices] IUserService userService, [FromServices] ILinkService linkService,
+        [FromRoute] int userId, [FromBody] ManageRolesRequestBody requestBody, CancellationToken cancellationToken = default)
+    {
+        var request = new ManageRolesRequest(userId, requestBody.Role);
+        var result = await userService.AssignRoleAsync(request, cancellationToken);
+        if (result.IsFailure)
+            return result.Error.Code switch
+            {
+                ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
+                ErrorCode.Conflict => TypedResults.Conflict(result.Error.Message),
+                _ => TypedResults.Problem("Failed result error value is incorrect."),
+            };
+
+        var links = GenerateAssignRoleLinks(linkService, userId);
+        var endpointResult = new EndpointResult(links.ToList());
+
+        return TypedResults.Ok(endpointResult);
+    }
+
+    private static async Task<IResult> UnassignRoleAsync(
+        [FromServices] IUserService userService, [FromServices] ILinkService linkService,
+        [FromRoute] int userId, [FromBody] ManageRolesRequestBody requestBody, CancellationToken cancellationToken = default)
+    {
+        var request = new ManageRolesRequest(userId, requestBody.Role);
+        var result = await userService.UnassignRoleAsync(request, cancellationToken);
+        if (result.IsFailure)
+            return result.Error.Code switch
+            {
+                ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
+                ErrorCode.Conflict => TypedResults.Conflict(result.Error.Message),
+                _ => TypedResults.Problem("Failed result error value is incorrect."),
+            };
+
+        var links = GenerateUnassignRoleLinks(linkService, userId);
+        var endpointResult = new EndpointResult(links.ToList());
+
+        return TypedResults.Ok(endpointResult);
+    }
+
     private static IEnumerable<Link> GeneratePagedGetLinks(ILinkService linkService, bool hasPrevious, bool hasNext, int pageNumber, int pageSize)
     {
         if (hasPrevious)
-            yield return linkService.Generate(GetUsers, new { pageNumber = pageNumber - 1, pageSize }, "self", "GET");
+            yield return linkService.Generate(UserEndpointsName.GetUsers, new { pageNumber = pageNumber - 1, pageSize }, "self", "GET");
         if (hasNext)
-            yield return linkService.Generate(GetUsers, new { pageNumber = pageNumber + 1, pageSize }, "self", "GET");
+            yield return linkService.Generate(UserEndpointsName.GetUsers, new { pageNumber = pageNumber + 1, pageSize }, "self", "GET");
     }
 
     private static IEnumerable<Link> GenerateGetLinks(ILinkService linkService, int userId)
     {
-        yield return linkService.Generate(UpdateUser, new { userId }, "self", "PUT");
-        yield return linkService.Generate(DeleteUser, new { userId }, "self", "DELETE");
+        yield return linkService.Generate(UserEndpointsName.UpdateUser, new { userId }, "self", "PUT");
+        yield return linkService.Generate(UserEndpointsName.DeleteUser, new { userId }, "self", "DELETE");
+        yield return linkService.Generate(UserEndpointsName.AssignRole, new { userId }, "self", "POST");
+        yield return linkService.Generate(UserEndpointsName.UnassignRole, new { userId }, "self", "DELETE");
     }
 
     private static IEnumerable<Link> GenerateCreateLinks(ILinkService linkService, int userId)
     {
-        yield return linkService.Generate(GetUserById, new { userId }, "self", "GET");
-        yield return linkService.Generate(UpdateUser, new { userId }, "self", "PUT");
-        yield return linkService.Generate(DeleteUser, new { userId }, "self", "DELETE");
+        yield return linkService.Generate(UserEndpointsName.GetUserById, new { userId }, "self", "GET");
+        yield return linkService.Generate(UserEndpointsName.UpdateUser, new { userId }, "self", "PUT");
+        yield return linkService.Generate(UserEndpointsName.DeleteUser, new { userId }, "self", "DELETE");
+        yield return linkService.Generate(UserEndpointsName.AssignRole, new { userId }, "self", "POST");
+        yield return linkService.Generate(UserEndpointsName.UnassignRole, new { userId }, "self", "DELETE");
     }
 
     private static IEnumerable<Link> GenerateUpdateLinks(ILinkService linkService, int userId)
     {
-        yield return linkService.Generate(GetUserById, new { userId }, "self", "GET");
-        yield return linkService.Generate(DeleteUser, new { userId }, "self", "DELETE");
+        yield return linkService.Generate(UserEndpointsName.GetUserById, new { userId }, "self", "GET");
+        yield return linkService.Generate(UserEndpointsName.DeleteUser, new { userId }, "self", "DELETE");
+        yield return linkService.Generate(UserEndpointsName.AssignRole, new { userId }, "self", "POST");
+        yield return linkService.Generate(UserEndpointsName.UnassignRole, new { userId }, "self", "DELETE");
+    }
+
+    private static IEnumerable<Link> GenerateAssignRoleLinks(ILinkService linkService, int userId)
+    {
+        yield return linkService.Generate(UserEndpointsName.GetUserById, new { userId }, "self", "GET");
+        yield return linkService.Generate(UserEndpointsName.UpdateUser, new { userId }, "self", "PUT");
+        yield return linkService.Generate(UserEndpointsName.DeleteUser, new { userId }, "self", "DELETE");
+        yield return linkService.Generate(UserEndpointsName.UnassignRole, new { userId }, "self", "DELETE");
+    }
+
+    private static IEnumerable<Link> GenerateUnassignRoleLinks(ILinkService linkService, int userId)
+    {
+        yield return linkService.Generate(UserEndpointsName.GetUserById, new { userId }, "self", "GET");
+        yield return linkService.Generate(UserEndpointsName.UpdateUser, new { userId }, "self", "PUT");
+        yield return linkService.Generate(UserEndpointsName.DeleteUser, new { userId }, "self", "DELETE");
+        yield return linkService.Generate(UserEndpointsName.AssignRole, new { userId }, "self", "POST");
     }
 }

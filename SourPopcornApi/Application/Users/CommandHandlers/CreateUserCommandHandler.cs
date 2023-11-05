@@ -2,8 +2,8 @@
 using Application.Abstractions.Messaging;
 using Application.Users.Abstractions;
 using Application.Users.Commands;
+using Domain.Auth.Constants;
 using Domain.Shared;
-using Domain.Users.Constants;
 using Domain.Users.Entities;
 
 namespace Application.Users.CommandHandlers;
@@ -17,7 +17,8 @@ public class CreateUserCommandHandler(IUserRepository userRepository, IUnitOfWor
             Username = command.Request.Username,
             PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(command.Request.Password),
             DisplayName = command.Request.DisplayName,
-            Roles = new List<string> { Role.User }
+            Roles = [Role.User],
+            ForceLogin = false
         };
 
         userRepository.Add(user);

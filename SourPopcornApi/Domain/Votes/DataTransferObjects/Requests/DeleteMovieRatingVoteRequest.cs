@@ -2,4 +2,4 @@
 
 namespace Domain.Votes.DataTransferObjects.Requests;
 
-public sealed record DeleteMovieRatingVoteRequest(int MovieId, int RatingId, int VoteId) : IRequest;
+public sealed record DeleteMovieRatingVoteRequest(int UserId, IEnumerable<string> Roles, int MovieId, int RatingId, int VoteId) : IRequest;

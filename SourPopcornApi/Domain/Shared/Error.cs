@@ -20,12 +20,17 @@ public class Error : IEquatable<Error>
     /// <summary>
     /// The null value error instance.
     /// </summary>
-    public static Error NullValue(string message = "The specified result value is null.") => new() { Code = ErrorCode.NullValue, Message = message };
+    public static Error NullValue(string message = "Value is null.") => new() { Code = ErrorCode.NullValue, Message = message };
 
     /// <summary>
     /// The condition not met error instance.
     /// </summary>
-    public static Error ConditionNotMet(string message = "The specified condition was not met.") => new() { Code = ErrorCode.ConditionNotMet, Message = message };
+    public static Error Conflict(string message = "Conflict with a current state.") => new() { Code = ErrorCode.Conflict, Message = message };
+
+    /// <summary>
+    /// The forbidden error instance.
+    /// </summary>
+    public static Error Forbidden(string message = "You do not have an access to this recourse.") => new() { Code = ErrorCode.Forbidden, Message = message };
 
     /// <summary>
     /// Gets the error code.

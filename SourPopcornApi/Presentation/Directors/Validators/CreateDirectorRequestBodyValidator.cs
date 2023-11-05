@@ -3,9 +3,9 @@ using Presentation.Directors.DataTransferObjects;
 
 namespace Presentation.Directors.Validators;
 
-public class UpdateDirectorRequestValidator : AbstractValidator<UpdateDirectorRequestBody>
+public class CreateDirectorRequestBodyValidator : AbstractValidator<CreateDirectorRequestBody>
 {
-    public UpdateDirectorRequestValidator()
+    public CreateDirectorRequestBodyValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required.")
