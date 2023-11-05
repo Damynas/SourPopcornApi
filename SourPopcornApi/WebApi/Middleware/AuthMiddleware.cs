@@ -51,19 +51,19 @@ namespace WebApi.Middleware
                 });
 
             services.AddAuthorizationBuilder()
-                .AddPolicy(Policy.AdminOnly, builder =>
+                .AddPolicy(Policy.Admin, builder =>
                 {
                     builder.RequireAuthenticatedUser()
                         .AddAuthenticationSchemes(AuthScheme)
                         .RequireClaim(ClaimTypes.Role, Role.Admin);
                 })
-                .AddPolicy(Policy.ModeratorOnly, builder =>
+                .AddPolicy(Policy.Moderator, builder =>
                 {
                     builder.RequireAuthenticatedUser()
                         .AddAuthenticationSchemes(AuthScheme)
                         .RequireClaim(ClaimTypes.Role, Role.Moderator);
                 })
-                .AddPolicy(Policy.UserOnly, builder =>
+                .AddPolicy(Policy.User, builder =>
                 {
                     builder.RequireAuthenticatedUser()
                         .AddAuthenticationSchemes(AuthScheme)

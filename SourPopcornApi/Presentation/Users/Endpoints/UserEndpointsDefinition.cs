@@ -25,30 +25,30 @@ public static class UserEndpointsDefinition
         var users = endpointRouteBuilder.MapGroup("/api").WithTags("Users");
         users.MapGet("/users", GetUsersAsync)
             .WithName(UserEndpointsName.GetUsers)
-            .RequireAuthorization(Policy.AdminOnly);
+            .RequireAuthorization(Policy.Admin);
         users.MapGet("/users/{userId}", GetUserByIdAsync)
             .WithName(UserEndpointsName.GetUserById)
-            .RequireAuthorization(Policy.AdminOnly);
+            .RequireAuthorization(Policy.Admin);
         users.MapPost("/users", CreateUserAsync)
             .WithName(UserEndpointsName.CreateUser)
             .AddEndpointFilter<CreateUserValidationFilter>()
-            .RequireAuthorization(Policy.AdminOnly);
+            .RequireAuthorization(Policy.Admin);
         users.MapPut("/users/{userId}", UpdateUserAsync)
             .WithName(UserEndpointsName.UpdateUser)
             .AddEndpointFilter<UpdateUserValidationFilter>()
-            .RequireAuthorization(Policy.AdminOnly);
+            .RequireAuthorization(Policy.Admin);
         users.MapDelete("/users/{userId}", DeleteUserAsync)
             .WithName(UserEndpointsName.DeleteUser)
-            .RequireAuthorization(Policy.AdminOnly);
+            .RequireAuthorization(Policy.Admin);
 
         users.MapPost("/users/{userId}/assign_role", AssignRoleAsync)
             .WithName(UserEndpointsName.AssignRole)
             .AddEndpointFilter<ManageRolesValidationFilter>()
-            .RequireAuthorization(Policy.AdminOnly);
+            .RequireAuthorization(Policy.Admin);
         users.MapDelete("/users/{userId}/unassign_role", UnassignRoleAsync)
             .WithName(UserEndpointsName.UnassignRole)
             .AddEndpointFilter<ManageRolesValidationFilter>()
-            .RequireAuthorization(Policy.AdminOnly);
+            .RequireAuthorization(Policy.Admin);
     }
 
     private static async Task<IResult> GetUsersAsync(HttpContext httpContext,

@@ -25,21 +25,21 @@ public static class MovieEndpointsDefinition
         var movies = endpointRouteBuilder.MapGroup("/api").WithTags("Movies");
         movies.MapGet("movies", GetMoviesAsync)
             .WithName(MovieEndpointsName.GetMovies)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         movies.MapGet("/movies/{movieId}", GetMovieByIdAsync)
             .WithName(MovieEndpointsName.GetMovieById)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         movies.MapPost("/movies", CreateMovieAsync)
             .WithName(MovieEndpointsName.CreateMovie)
             .AddEndpointFilter<CreateMovieValidationFilter>()
-            .RequireAuthorization(Policy.ModeratorOnly);
+            .RequireAuthorization(Policy.Moderator);
         movies.MapPut("/movies/{movieId}", UpdateMovieAsync)
             .WithName(MovieEndpointsName.UpdateMovie)
             .AddEndpointFilter<UpdateMovieValidationFilter>()
-            .RequireAuthorization(Policy.ModeratorOnly);
+            .RequireAuthorization(Policy.Moderator);
         movies.MapDelete("/movies/{movieId}", DeleteMovieAsync)
             .WithName(MovieEndpointsName.DeleteMovie)
-            .RequireAuthorization(Policy.ModeratorOnly);
+            .RequireAuthorization(Policy.Moderator);
     }
 
     private static async Task<IResult> GetMoviesAsync(HttpContext httpContext,
@@ -130,7 +130,7 @@ public static class MovieEndpointsDefinition
         return TypedResults.NoContent();
     }
 
-    private static IEnumerable<Link> GeneratePagedGetLinks(ILinkService linkService,bool hasPrevious, bool hasNext, int pageNumber, int pageSize)
+    private static IEnumerable<Link> GeneratePagedGetLinks(ILinkService linkService, bool hasPrevious, bool hasNext, int pageNumber, int pageSize)
     {
         if (hasPrevious)
             yield return linkService.Generate(MovieEndpointsName.GetMovies, new { pageNumber = pageNumber - 1, pageSize }, "self", "GET");

@@ -26,21 +26,21 @@ public static class DirectorEndpointsDefinition
 
         directors.MapGet("/directors", GetDirectorsAsync)
             .WithName(DirectorEndpointsName.GetDirectors)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         directors.MapGet("/directors/{directorId}", GetDirectorByIdAsync)
             .WithName(DirectorEndpointsName.GetDirectorById)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         directors.MapPost("/directors", CreateDirectorAsync)
             .WithName(DirectorEndpointsName.CreateDirector)
             .AddEndpointFilter<CreateDirectorValidationFilter>()
-            .RequireAuthorization(Policy.ModeratorOnly);
+            .RequireAuthorization(Policy.Moderator);
         directors.MapPut("/directors/{directorId}", UpdateDirectorAsync)
             .WithName(DirectorEndpointsName.UpdateDirector)
             .AddEndpointFilter<UpdateDirectorValidationFilter>()
-            .RequireAuthorization(Policy.ModeratorOnly);
+            .RequireAuthorization(Policy.Moderator);
         directors.MapDelete("/directors/{directorId}", DeleteDirectorAsync)
             .WithName(DirectorEndpointsName.DeleteDirector)
-            .RequireAuthorization(Policy.ModeratorOnly);
+            .RequireAuthorization(Policy.Moderator);
     }
 
     private static async Task<IResult> GetDirectorsAsync(HttpContext httpContext,

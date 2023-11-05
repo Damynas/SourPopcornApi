@@ -15,8 +15,6 @@ using Presentation.Auth.Constants;
 using Presentation.Auth.DataTransferObjects;
 using Presentation.Auth.Filters;
 using Presentation.Shared.Helpers;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace Presentation.Auth.Endpoints
 {
@@ -31,14 +29,14 @@ namespace Presentation.Auth.Endpoints
                 .AllowAnonymous();
             auth.MapPost("/auth/logout", Logout)
                 .WithName(AuthEndpointName.Logout)
-                .RequireAuthorization(Policy.UserOnly);
+                .RequireAuthorization(Policy.User);
             auth.MapPost("/auth/register", RegisterAsync)
                 .WithName(AuthEndpointName.Register)
                 .AddEndpointFilter<RegisterValidationFilter>()
                 .AllowAnonymous();
             auth.MapPost("/auth/refresh_access_token", RefreshAccessTokenAsync)
                 .WithName(AuthEndpointName.RefreshAccessToken)
-                .RequireAuthorization(Policy.UserOnly);
+                .RequireAuthorization(Policy.User);
         }
 
         private static async Task<IResult> LoginAsync(HttpContext httpContext,

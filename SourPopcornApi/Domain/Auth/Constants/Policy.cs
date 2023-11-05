@@ -2,9 +2,9 @@
 
 public static class Policy
 {
-    public const string AdminOnly = "AdminOnly";
+    public const string Admin = "Admin";
 
-    public const string ModeratorOnly = "ModeratorOnly";
+    public const string Moderator = "Moderator";
 
-    public const string UserOnly = "UserOnly";
+    public const string User = "User";
 }

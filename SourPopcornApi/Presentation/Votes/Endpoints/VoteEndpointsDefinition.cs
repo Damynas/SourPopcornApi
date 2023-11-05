@@ -26,19 +26,19 @@ public static class VoteEndpointsDefinition
         var votes = endpointRouteBuilder.MapGroup("/api/movies/{movieId}/ratings/{ratingId}").WithTags("Votes");
         votes.MapGet("/votes", GetMovieRatingVotesAsync)
             .WithName(VoteEndpointsName.GetMovieRatingVotes)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         votes.MapGet("/votes/{voteId}", GetMovieRatingVoteByIdAsync)
             .WithName(VoteEndpointsName.GetMovieRatingVoteById)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         votes.MapPost("/votes", CreateMovieRatingVoteAsync)
             .WithName(VoteEndpointsName.CreateMovieRatingVote)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         votes.MapPut("/votes/{voteId}", UpdateMovieRatingVoteAsync)
             .WithName(VoteEndpointsName.UpdateMovieRatingVote)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         votes.MapDelete("/votes/{voteId}", DeleteMovieRatingVoteAsync)
             .WithName(VoteEndpointsName.DeleteMovieRatingVote)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
     }
 
     private static async Task<IResult> GetMovieRatingVotesAsync(HttpContext httpContext,

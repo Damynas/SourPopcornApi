@@ -27,21 +27,21 @@ public static class RatingEndpointsDefinition
         var ratings = endpointRouteBuilder.MapGroup("/api/movies/{movieId}").WithTags("Ratings");
         ratings.MapGet("/ratings", GetMovieRatingsAsync)
             .WithName(RatingEndpointsName.GetMovieRatings)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         ratings.MapGet("/ratings/{ratingId}", GetMovieRatingByIdAsync)
             .WithName(RatingEndpointsName.GetMovieRatingById)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         ratings.MapPost("/ratings", CreateMovieRatingAsync)
             .WithName(RatingEndpointsName.CreateMovieRating)
             .AddEndpointFilter<CreateMovieRatingValidationFilter>()
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         ratings.MapPut("/ratings/{ratingId}", UpdateMovieRatingAsync)
             .WithName(RatingEndpointsName.UpdateMovieRating)
             .AddEndpointFilter<UpdateMovieRatingValidationFilter>()
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
         ratings.MapDelete("/ratings/{ratingId}", DeleteMovieRatingAsync)
             .WithName(RatingEndpointsName.DeleteMovieRating)
-            .RequireAuthorization(Policy.UserOnly);
+            .RequireAuthorization(Policy.User);
     }
 
     private static async Task<IResult> GetMovieRatingsAsync(HttpContext httpContext,
@@ -71,7 +71,7 @@ public static class RatingEndpointsDefinition
         [FromServices] IRatingService ratingService, [FromServices] IRatingMapper ratingMapper, [FromServices] ILinkService linkService,
         [FromRoute] int movieId, [FromRoute] int ratingId, CancellationToken cancellationToken = default)
     {
-        var request = new GetMovieRatingByIdRequest(movieId,ratingId);
+        var request = new GetMovieRatingByIdRequest(movieId, ratingId);
         var result = await ratingService.GetMovieRatingByIdAsync(request, cancellationToken);
         if (result.IsFailure)
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
@@ -134,10 +134,11 @@ public static class RatingEndpointsDefinition
         if (roles is null)
             return TypedResults.UnprocessableEntity("Access token is not valid.");
 
-        var request = new UpdateMovieRatingRequest( userId.Value, roles, movieId, ratingId, requestBody.SourPopcorns, requestBody.Comment);
+        var request = new UpdateMovieRatingRequest(userId.Value, roles, movieId, ratingId, requestBody.SourPopcorns, requestBody.Comment);
         var result = await ratingService.UpdateMovieRatingAsync(request, cancellationToken);
         if (result.IsFailure)
-            return result.Error.Code switch {
+            return result.Error.Code switch
+            {
                 ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
                 ErrorCode.Forbidden => TypedResults.UnprocessableEntity(result.Error.Message),
                 _ => TypedResults.Problem("Failed result error value is incorrect.")
