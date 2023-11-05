@@ -21,7 +21,6 @@ public class Movie(int id, DateTime createdOn, DateTime modifiedOn, bool isDelet
     public required List<string> Actors { get; set; }
 
     // Navigation properties
-
     public virtual Director Director { get; set; } = null!;
 
     public virtual ICollection<Rating> Ratings { get; } = new List<Rating>();

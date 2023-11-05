@@ -2,4 +2,4 @@
 
 namespace Domain.Ratings.DataTransferObjects.Requests;
 
-public sealed record CreateMovieRatingRequest(int MovieId, int CreatorId, int SourPopcorns, string Comment) : IRequest;
+public sealed record CreateMovieRatingRequest(int CreatorId, int MovieId, int SourPopcorns, string Comment) : IRequest;

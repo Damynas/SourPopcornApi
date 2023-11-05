@@ -1,3 +1,3 @@
 ﻿namespace Presentation.Ratings.DataTransferObjects;
 
-public sealed record CreateMovieRatingRequestBody(int CreatorId, int SourPopcorns, string Comment);
+public sealed record CreateMovieRatingRequestBody(int SourPopcorns, string Comment);

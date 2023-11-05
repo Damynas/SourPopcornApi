@@ -86,11 +86,19 @@ public static class RatingEndpointsDefinition
         return TypedResults.Ok(endpointResult);
     }
 
-    private static async Task<IResult> CreateMovieRatingAsync(
-        [FromServices] IRatingService ratingService, [FromServices] IRatingMapper ratingMapper, [FromServices] ILinkService linkService,
+    private static async Task<IResult> CreateMovieRatingAsync(HttpContext httpContext,
+        [FromServices] ITokenService tokenService, [FromServices] IRatingService ratingService, [FromServices] IRatingMapper ratingMapper, [FromServices] ILinkService linkService,
         [FromRoute] int movieId, [FromBody] CreateMovieRatingRequestBody requestBody, CancellationToken cancellationToken = default)
     {
-        var request = new CreateMovieRatingRequest(movieId, requestBody.CreatorId, requestBody.SourPopcorns, requestBody.Comment);
+        var accessToken = CookieHelper.GetCookie(httpContext, CookieName.AccessToken);
+        if (accessToken is null)
+            return TypedResults.UnprocessableEntity("Access token is not valid.");
+
+        var userId = tokenService.GetUserId(accessToken);
+        if (!userId.HasValue)
+            return TypedResults.UnprocessableEntity("Access token is not valid.");
+
+        var request = new CreateMovieRatingRequest(userId.Value, movieId, requestBody.SourPopcorns, requestBody.Comment);
         var result = await ratingService.CreateMovieRatingAsync(request, cancellationToken);
         if (result.IsFailure)
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");

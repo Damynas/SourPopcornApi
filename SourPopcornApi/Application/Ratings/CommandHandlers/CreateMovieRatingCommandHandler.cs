@@ -3,14 +3,13 @@ using Application.Abstractions.Messaging;
 using Application.Movies.Abstractions;
 using Application.Ratings.Abstractions;
 using Application.Ratings.Commands;
-using Application.Users.Abstractions;
 using Domain.Ratings.Entities;
 using Domain.Shared;
 
 namespace Application.Ratings.CommandHandlers;
 
 public class CreateMovieRatingCommandHandler(
-    IMovieRepository movieRepository, IRatingRepository ratingRepository, IUserRepository userRepository,
+    IMovieRepository movieRepository, IRatingRepository ratingRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<CreateMovieRatingCommand, Rating?>
 {
     public async Task<Result<Rating?>> Handle(CreateMovieRatingCommand command, CancellationToken cancellationToken)
@@ -19,14 +18,10 @@ public class CreateMovieRatingCommandHandler(
         if (movie is null)
             return Result<Rating?>.Failure(null, Error.NullValue("Specified movie does not exist."));
 
-        var user = await userRepository.GetByIdAsync(command.Request.CreatorId, cancellationToken);
-        if (user is null)
-            return Result<Rating?>.Failure(null, Error.NullValue("Specified user does not exist."));
-
         var rating = new Rating(default, DateTime.UtcNow, DateTime.UtcNow)
         {
+            CreatorId = command.Request.CreatorId,
             MovieId = movie.Id,
-            CreatorId = user.Id,
             SourPopcorns = command.Request.SourPopcorns,
             Comment = command.Request.Comment
         };

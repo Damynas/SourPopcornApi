@@ -11,10 +11,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Auth.Services;
 using Presentation.Shared;
 using Presentation.Shared.Helpers;
 using Presentation.Votes.Constants;
 using Presentation.Votes.DataTransferObjects;
+using System.Net.Http;
 using System.Text.Json;
 
 namespace Presentation.Votes.Endpoints;
@@ -83,11 +85,19 @@ public static class VoteEndpointsDefinition
         return TypedResults.Ok(endpointResult);
     }
 
-    private static async Task<IResult> CreateMovieRatingVoteAsync(
-        [FromServices] IVoteService voteService, [FromServices] IVoteMapper voteMapper, [FromServices] ILinkService linkService,
+    private static async Task<IResult> CreateMovieRatingVoteAsync(HttpContext httpContext,
+        [FromServices] ITokenService tokenService, [FromServices] IVoteService voteService, [FromServices] IVoteMapper voteMapper, [FromServices] ILinkService linkService,
         [FromRoute] int movieId, [FromRoute] int ratingId, [FromBody] CreateMovieRatingVoteRequestBody requestBody, CancellationToken cancellationToken = default)
     {
-        var request = new CreateMovieRatingVoteRequest(movieId, ratingId, requestBody.CreatorId, requestBody.IsPositive);
+        var accessToken = CookieHelper.GetCookie(httpContext, CookieName.AccessToken);
+        if (accessToken is null)
+            return TypedResults.UnprocessableEntity("Access token is not valid.");
+
+        var userId = tokenService.GetUserId(accessToken);
+        if (!userId.HasValue)
+            return TypedResults.UnprocessableEntity("Access token is not valid.");
+
+        var request = new CreateMovieRatingVoteRequest(userId.Value, movieId, ratingId, requestBody.IsPositive);
         var result = await voteService.CreateMovieRatingVoteAsync(request, cancellationToken);
         if (result.IsFailure)
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
