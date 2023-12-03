@@ -17,10 +17,19 @@ public class ValidationFilter<TEntity> : IEndpointFilter
 
             var validation = await validator.ValidateAsync(entity);
             if (!validation.IsValid)
-                return TypedResults.UnprocessableEntity(validation.ToDictionary());
+                return TypedResults.UnprocessableEntity(TransformValidationErrors(validation.ToDictionary()));
         }
 
         return await next(context);
+    }
+
+    private static List<object> TransformValidationErrors(IDictionary<string, string[]> validationErrors)
+    {
+        return validationErrors.Select(entry => new
+        {
+            PropertyName = entry.Key,
+            Value = string.Join(" ", entry.Value)
+        }).Cast<object>().ToList();
     }
 }
 

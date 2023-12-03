@@ -19,11 +19,11 @@ public class RegisterRequestBodyValidator : AbstractValidator<RegisterRequestBod
             .MustAsync(UsernameIsUniqueAsync).WithMessage("Username is already in use.");
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Password is required.")
-            .MinimumLength(8).WithMessage("Your password length must be at least 8.")
+            .MinimumLength(8).WithMessage("Your password must have at least 8 characters.")
             .Matches(@"[A-Z]+").WithMessage("Your password must contain at least one uppercase letter.")
             .Matches(@"[a-z]+").WithMessage("Your password must contain at least one lowercase letter.")
             .Matches(@"[0-9]+").WithMessage("Your password must contain at least one number.")
-            .Matches(@"[@#$%^&+=]+").WithMessage("Your password must contain at least one special character.");
+            .Matches(@"[@$!%*?&]+").WithMessage("Your password must contain at least one special character.");
         RuleFor(x => x.DisplayName)
             .NotEmpty().WithMessage("Display name is required.")
             .MaximumLength(20).WithMessage("Display name cannot exceed 20 characters.");
