@@ -11,16 +11,18 @@ internal class RatingConfiguration : IEntityTypeConfiguration<Rating>
         builder.ToTable("ratings");
 
         builder.HasKey(r => r.Id);
-        builder.Property(r => r.Id).ValueGeneratedOnAdd();
+        builder.Property(r => r.Id)
+            .IsRequired().HasColumnName("id")
+            .ValueGeneratedOnAdd();
 
-        builder.Property(r => r.CreatedOn).IsRequired();
-        builder.Property(r => r.ModifiedOn).IsRequired();
-        builder.Property(r => r.IsDeleted).IsRequired();
+        builder.Property(r => r.CreatedOn).IsRequired().HasColumnName("createdOn");
+        builder.Property(r => r.ModifiedOn).IsRequired().HasColumnName("modifiedOn");
+        builder.Property(r => r.IsDeleted).IsRequired().HasColumnName("isDeleted");
 
-        builder.Property(v => v.MovieId).IsRequired();
-        builder.Property(v => v.CreatorId).IsRequired();
-        builder.Property(r => r.SourPopcorns).IsRequired();
-        builder.Property(r => r.Comment).IsRequired();
+        builder.Property(r => r.MovieId).IsRequired().HasColumnName("movieId");
+        builder.Property(r => r.CreatorId).IsRequired().HasColumnName("creatorId");
+        builder.Property(r => r.SourPopcorns).IsRequired().HasColumnName("sourPopcorns");
+        builder.Property(r => r.Comment).IsRequired().HasColumnName("comment");
 
         builder
             .HasMany(r => r.Votes)

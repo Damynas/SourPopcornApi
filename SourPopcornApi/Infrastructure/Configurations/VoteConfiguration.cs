@@ -11,14 +11,16 @@ internal class VoteConfiguration : IEntityTypeConfiguration<Vote>
         builder.ToTable("votes");
 
         builder.HasKey(v => v.Id);
-        builder.Property(v => v.Id).ValueGeneratedOnAdd();
+        builder.Property(v => v.Id)
+            .IsRequired().HasColumnName("id")
+            .ValueGeneratedOnAdd();
 
-        builder.Property(v => v.CreatedOn).IsRequired();
-        builder.Property(v => v.ModifiedOn).IsRequired();
-        builder.Property(v => v.IsDeleted).IsRequired();
+        builder.Property(v => v.CreatedOn).IsRequired().HasColumnName("createdOn");
+        builder.Property(v => v.ModifiedOn).IsRequired().HasColumnName("modifiedOn");
+        builder.Property(v => v.IsDeleted).IsRequired().HasColumnName("isDeleted");
 
-        builder.Property(v => v.RatingId).IsRequired();
-        builder.Property(v => v.CreatorId).IsRequired();
-        builder.Property(v => v.IsPositive).IsRequired();
+        builder.Property(v => v.RatingId).IsRequired().HasColumnName("ratingId");
+        builder.Property(v => v.CreatorId).IsRequired().HasColumnName("creatorId");
+        builder.Property(v => v.IsPositive).IsRequired().HasColumnName("isPositive");
     }
 }

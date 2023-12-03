@@ -12,16 +12,18 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("users");
 
         builder.HasKey(u => u.Id);
-        builder.Property(u => u.Id).ValueGeneratedOnAdd();
+        builder.Property(u => u.Id)
+            .IsRequired().HasColumnName("id")
+            .ValueGeneratedOnAdd();
 
-        builder.Property(u => u.CreatedOn).IsRequired();
-        builder.Property(u => u.ModifiedOn).IsRequired();
-        builder.Property(u => u.IsDeleted).IsRequired();
+        builder.Property(u => u.CreatedOn).IsRequired().HasColumnName("createdOn");
+        builder.Property(u => u.ModifiedOn).IsRequired().HasColumnName("modifiedOn");
+        builder.Property(u => u.IsDeleted).IsRequired().HasColumnName("isDeleted");
 
-        builder.Property(u => u.Username).IsRequired();
-        builder.Property(u => u.PasswordHash).IsRequired();
-        builder.Property(u => u.DisplayName).IsRequired();
-        builder.Property(u => u.ForceLogin).IsRequired();
+        builder.Property(u => u.Username).IsRequired().HasColumnName("username");
+        builder.Property(u => u.PasswordHash).IsRequired().HasColumnName("passwordHash");
+        builder.Property(u => u.DisplayName).IsRequired().HasColumnName("displayName");
+        builder.Property(u => u.ForceLogin).IsRequired().HasColumnName("forceLogin");
 
         builder
             .HasMany(r => r.Ratings)
@@ -38,6 +40,7 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
         builder
             .Property(u => u.Roles)
             .IsRequired()
+            .HasColumnName("roles")
             .HasConversion(
                 v => string.Join(',', v),
                 v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()

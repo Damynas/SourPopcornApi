@@ -29,7 +29,6 @@ public static class DependencyInjection
         var connectionString = environment.IsDevelopment() ? GetDevelopmentConnectionString() : GetProductionConnectionString(configuration);
         services.AddDbContext<ApplicationDbContext>(options => options
             .UseNpgsql(connectionString)
-            .UseCamelCaseNamingConvention()
             .UseLazyLoadingProxies()
         );
 
@@ -85,7 +84,6 @@ public static class DependencyInjection
             Username = username,
             Password = password,
             IncludeErrorDetail = true,
-            IntegratedSecurity = true,
             Pooling = true
         }.ToString();
 

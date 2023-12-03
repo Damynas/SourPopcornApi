@@ -12,17 +12,19 @@ internal class MovieConfiguration : IEntityTypeConfiguration<Movie>
         builder.ToTable("movies");
 
         builder.HasKey(m => m.Id);
-        builder.Property(m => m.Id).ValueGeneratedOnAdd();
+        builder.Property(m => m.Id)
+            .IsRequired().HasColumnName("id")
+            .ValueGeneratedOnAdd();
 
-        builder.Property(m => m.CreatedOn).IsRequired();
-        builder.Property(m => m.ModifiedOn).IsRequired();
-        builder.Property(m => m.IsDeleted).IsRequired();
+        builder.Property(m => m.CreatedOn).IsRequired().HasColumnName("createdOn");
+        builder.Property(m => m.ModifiedOn).IsRequired().HasColumnName("modifiedOn");
+        builder.Property(m => m.IsDeleted).IsRequired().HasColumnName("isDeleted");
 
-        builder.Property(m => m.DirectorId).IsRequired();
-        builder.Property(m => m.Description).IsRequired();
-        builder.Property(m => m.Country).IsRequired();
-        builder.Property(m => m.Language).IsRequired();
-        builder.Property(m => m.ReleasedOn).IsRequired();
+        builder.Property(m => m.DirectorId).IsRequired().HasColumnName("directorId");
+        builder.Property(m => m.Description).IsRequired().HasColumnName("description");
+        builder.Property(m => m.Country).IsRequired().HasColumnName("country");
+        builder.Property(m => m.Language).IsRequired().HasColumnName("language");
+        builder.Property(m => m.ReleasedOn).IsRequired().HasColumnName("releasedOn");
 
         builder
             .HasMany(m => m.Ratings)
@@ -33,6 +35,7 @@ internal class MovieConfiguration : IEntityTypeConfiguration<Movie>
         builder
             .Property(m => m.Writers)
             .IsRequired()
+            .HasColumnName("writers")
             .HasConversion(
                 v => string.Join(',', v),
                 v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
@@ -45,6 +48,7 @@ internal class MovieConfiguration : IEntityTypeConfiguration<Movie>
         builder
             .Property(m => m.Actors)
             .IsRequired()
+            .HasColumnName("actors")
             .HasConversion(
                 v => string.Join(',', v),
                 v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()

@@ -11,15 +11,17 @@ internal class DirectorConfiguration : IEntityTypeConfiguration<Director>
         builder.ToTable("directors");
 
         builder.HasKey(d => d.Id);
-        builder.Property(d => d.Id).ValueGeneratedOnAdd();
+        builder.Property(d => d.Id)
+            .IsRequired().HasColumnName("id")
+            .ValueGeneratedOnAdd();
 
-        builder.Property(d => d.CreatedOn).IsRequired();
-        builder.Property(d => d.ModifiedOn).IsRequired();
-        builder.Property(d => d.IsDeleted).IsRequired();
+        builder.Property(d => d.CreatedOn).IsRequired().HasColumnName("createdOn");
+        builder.Property(d => d.ModifiedOn).IsRequired().HasColumnName("modifiedOn");
+        builder.Property(d => d.IsDeleted).IsRequired().HasColumnName("isDeleted");
 
-        builder.Property(d => d.Name).IsRequired();
-        builder.Property(d => d.Country).IsRequired();
-        builder.Property(d => d.BornOn).IsRequired();
+        builder.Property(d => d.Name).IsRequired().HasColumnName("name");
+        builder.Property(d => d.Country).IsRequired().HasColumnName("country");
+        builder.Property(d => d.BornOn).IsRequired().HasColumnName("bornOn");
 
         builder
             .HasMany(d => d.Movies)
