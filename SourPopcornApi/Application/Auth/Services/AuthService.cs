@@ -19,4 +19,10 @@ public class AuthService(ISender sender) : IAuthService
         var command = new LoginCommand(request);
         return await sender.Send(command, cancellationToken);
     }
+
+    public async Task<Result> LogoutAsync(LogoutRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new LogoutCommand(request);
+        return await sender.Send(command, cancellationToken);
+    }
 }

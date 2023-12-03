@@ -9,4 +9,6 @@ public static class AuthEndpointName
     public const string Register = "Register";
 
     public const string RefreshAccessToken = "RefreshAccessToken";
+
+    public const string Ping = "Ping";
 }

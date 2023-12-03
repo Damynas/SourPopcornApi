@@ -8,4 +8,5 @@ public interface IAuthService
 {
     Task<Result<User>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default);
     Task<Result<User?>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
+    Task<Result> LogoutAsync(LogoutRequest request, CancellationToken cancellationToken = default);
 }

@@ -34,9 +34,7 @@ namespace Presentation.Auth.Services
         {
             var claims = new List<Claim>()
             {
-                new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new (JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new (ClaimTypes.Name, user.Username)
+                new (ClaimTypes.NameIdentifier, user.Id.ToString())
             };
             claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
@@ -57,8 +55,7 @@ namespace Presentation.Auth.Services
         {
             var claims = new List<Claim>()
             {
-                new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new (JwtRegisteredClaimNames.Sub, user.Id.ToString())
+                new (ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
             var token = new JwtSecurityToken
@@ -76,7 +73,7 @@ namespace Presentation.Auth.Services
 
         public int? GetUserId(string token)
         {
-            if (!TryParseToken(token, out var claimsPrincipal) || claimsPrincipal is null || !int.TryParse(claimsPrincipal.FindFirstValue(JwtRegisteredClaimNames.Sub), out var userId))
+            if (!TryParseToken(token, out var claimsPrincipal) || claimsPrincipal is null || !int.TryParse(claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
                 return null;
 
             return userId;
