@@ -14,6 +14,7 @@ using Presentation.Movies.Constants;
 using Presentation.Movies.DataTransferObjects;
 using Presentation.Movies.Filters;
 using Presentation.Shared;
+using System.Globalization;
 using System.Text.Json;
 
 namespace Presentation.Movies.Endpoints;
@@ -70,7 +71,7 @@ public static class MovieEndpointsDefinition
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = movieMapper.ToResponse(result.Value);
         var links = GenerateGetLinks(linkService, movieId);
@@ -84,13 +85,13 @@ public static class MovieEndpointsDefinition
         [FromBody] CreateMovieRequestBody requestBody, CancellationToken cancellationToken = default)
     {
         var request = new CreateMovieRequest(
-            requestBody.DirectorId, requestBody.Description, requestBody.Country, requestBody.Language, requestBody.ReleasedOn, requestBody.Writers, requestBody.Actors);
+            requestBody.DirectorId, requestBody.Title, requestBody.Description, requestBody.Country, requestBody.Language, DateTime.Parse(requestBody.ReleasedOn, CultureInfo.InvariantCulture, DateTimeStyles.None), requestBody.Writers, requestBody.Actors);
         var result = await movieService.CreateMovieAsync(request, cancellationToken);
         if (result.IsFailure)
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = movieMapper.ToResponse(result.Value);
         var links = GenerateCreateLinks(linkService, response.Id);
@@ -104,13 +105,13 @@ public static class MovieEndpointsDefinition
         [FromRoute] int movieId, [FromBody] UpdateMovieRequestBody requestBody, CancellationToken cancellationToken = default)
     {
         var request = new UpdateMovieRequest(
-            movieId, requestBody.DirectorId, requestBody.Description, requestBody.Country, requestBody.Language, requestBody.ReleasedOn, requestBody.Writers, requestBody.Actors);
+            movieId, requestBody.DirectorId, requestBody.Title, requestBody.Description, requestBody.Country, requestBody.Language, DateTime.Parse(requestBody.ReleasedOn, CultureInfo.InvariantCulture, DateTimeStyles.None), requestBody.Writers, requestBody.Actors);
         var result = await movieService.UpdateMovieAsync(request, cancellationToken);
         if (result.IsFailure)
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = movieMapper.ToResponse(result.Value);
         var links = GenerateUpdateLinks(linkService, response.Id);

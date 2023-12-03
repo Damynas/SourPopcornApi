@@ -10,7 +10,7 @@ public class MovieMapper : IMovieMapper
     {
         return new MovieResponse(
             movie.Id, movie.CreatedOn, movie.ModifiedOn,
-            movie.DirectorId, movie.Description, movie.Country, movie.Language, movie.ReleasedOn, movie.Writers, movie.Actors);
+            movie.DirectorId, movie.Title, movie.Description, movie.Country, movie.Language, movie.ReleasedOn, movie.Writers, movie.Actors);
     }
 
     public ICollection<MovieResponse> ToResponses(ICollection<Movie> movies)

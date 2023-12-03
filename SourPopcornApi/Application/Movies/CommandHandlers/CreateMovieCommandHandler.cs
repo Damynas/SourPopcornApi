@@ -20,6 +20,7 @@ public class CreateMovieCommandHandler(IDirectorRepository directorRepository, I
         var movie = new Movie(default, DateTime.UtcNow, DateTime.UtcNow)
         {
             DirectorId = director.Id,
+            Title = command.Request.Title,
             Description = command.Request.Description,
             Country = command.Request.Country,
             Language = command.Request.Language,
