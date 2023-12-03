@@ -17,6 +17,10 @@ public class UpdateUserCommandHandler(IUserRepository userRepository, IUnitOfWor
 
         user.ModifiedOn = DateTime.UtcNow;
         user.DisplayName = command.Request.DisplayName;
+        if (command.Request.Roles is not null && command.Request.Roles.Count != 0)
+        {
+            user.Roles = [.. command.Request.Roles.Distinct().OrderByDescending(role => role)];
+        }
 
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);

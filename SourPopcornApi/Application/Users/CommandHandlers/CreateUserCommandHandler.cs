@@ -17,7 +17,7 @@ public class CreateUserCommandHandler(IUserRepository userRepository, IUnitOfWor
             Username = command.Request.Username,
             PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(command.Request.Password),
             DisplayName = command.Request.DisplayName,
-            Roles = [Role.User],
+            Roles = command.Request.Roles is not null && command.Request.Roles.Count != 0 ? [.. command.Request.Roles.Distinct().OrderByDescending(role => role)] : [Role.User],
             ForceLogin = false
         };
 

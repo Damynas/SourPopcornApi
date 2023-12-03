@@ -11,8 +11,4 @@ public static class UserEndpointsName
     public const string UpdateUser = "UpdateUser";
 
     public const string DeleteUser = "DeleteUser";
-
-    public const string AssignRole = "AssignRole";
-
-    public const string UnassignRole = "UnassignRole";
 }

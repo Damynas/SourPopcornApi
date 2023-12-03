@@ -40,15 +40,6 @@ public static class UserEndpointsDefinition
         users.MapDelete("/users/{userId}", DeleteUserAsync)
             .WithName(UserEndpointsName.DeleteUser)
             .RequireAuthorization(Policy.Admin);
-
-        users.MapPost("/users/{userId}/assign_role", AssignRoleAsync)
-            .WithName(UserEndpointsName.AssignRole)
-            .AddEndpointFilter<ManageRolesValidationFilter>()
-            .RequireAuthorization(Policy.Admin);
-        users.MapDelete("/users/{userId}/unassign_role", UnassignRoleAsync)
-            .WithName(UserEndpointsName.UnassignRole)
-            .AddEndpointFilter<ManageRolesValidationFilter>()
-            .RequireAuthorization(Policy.Admin);
     }
 
     private static async Task<IResult> GetUsersAsync(HttpContext httpContext,
@@ -79,7 +70,7 @@ public static class UserEndpointsDefinition
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = userMapper.ToResponse(result.Value);
         var links = GenerateGetLinks(linkService, response.Id);
@@ -92,7 +83,7 @@ public static class UserEndpointsDefinition
         [FromServices] IUserService userService, [FromServices] IUserMapper userMapper, [FromServices] ILinkService linkService,
         [FromBody] CreateUserRequestBody requestBody, CancellationToken cancellationToken = default)
     {
-        var request = new CreateUserRequest(requestBody.Username, requestBody.Password, requestBody.DisplayName);
+        var request = new CreateUserRequest(requestBody.Username, requestBody.Password, requestBody.DisplayName, requestBody.Roles);
         var result = await userService.CreateUserAsync(request, cancellationToken);
 
         var response = userMapper.ToResponse(result.Value);
@@ -106,13 +97,13 @@ public static class UserEndpointsDefinition
         [FromServices] IUserService userService, [FromServices] IUserMapper userMapper, [FromServices] ILinkService linkService,
         [FromRoute] int userId, [FromBody] UpdateUserRequestBody requestBody, CancellationToken cancellationToken = default)
     {
-        var request = new UpdateUserRequest(userId, requestBody.DisplayName);
+        var request = new UpdateUserRequest(userId, requestBody.DisplayName, requestBody.Roles);
         var result = await userService.UpdateUserAsync(request, cancellationToken);
         if (result.IsFailure)
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = userMapper.ToResponse(result.Value);
         var links = GenerateUpdateLinks(linkService, response.Id);
@@ -132,46 +123,6 @@ public static class UserEndpointsDefinition
         return TypedResults.NoContent();
     }
 
-    private static async Task<IResult> AssignRoleAsync(
-        [FromServices] IUserService userService, [FromServices] ILinkService linkService,
-        [FromRoute] int userId, [FromBody] ManageRolesRequestBody requestBody, CancellationToken cancellationToken = default)
-    {
-        var request = new ManageRolesRequest(userId, requestBody.Role);
-        var result = await userService.AssignRoleAsync(request, cancellationToken);
-        if (result.IsFailure)
-            return result.Error.Code switch
-            {
-                ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
-                ErrorCode.Conflict => TypedResults.Conflict(result.Error.Message),
-                _ => TypedResults.Problem("Failed result error value is incorrect."),
-            };
-
-        var links = GenerateAssignRoleLinks(linkService, userId);
-        var endpointResult = new EndpointResult(links.ToList());
-
-        return TypedResults.Ok(endpointResult);
-    }
-
-    private static async Task<IResult> UnassignRoleAsync(
-        [FromServices] IUserService userService, [FromServices] ILinkService linkService,
-        [FromRoute] int userId, [FromBody] ManageRolesRequestBody requestBody, CancellationToken cancellationToken = default)
-    {
-        var request = new ManageRolesRequest(userId, requestBody.Role);
-        var result = await userService.UnassignRoleAsync(request, cancellationToken);
-        if (result.IsFailure)
-            return result.Error.Code switch
-            {
-                ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
-                ErrorCode.Conflict => TypedResults.Conflict(result.Error.Message),
-                _ => TypedResults.Problem("Failed result error value is incorrect."),
-            };
-
-        var links = GenerateUnassignRoleLinks(linkService, userId);
-        var endpointResult = new EndpointResult(links.ToList());
-
-        return TypedResults.Ok(endpointResult);
-    }
-
     private static IEnumerable<Link> GeneratePagedGetLinks(ILinkService linkService, bool hasPrevious, bool hasNext, int pageNumber, int pageSize)
     {
         if (hasPrevious)
@@ -184,8 +135,6 @@ public static class UserEndpointsDefinition
     {
         yield return linkService.Generate(UserEndpointsName.UpdateUser, new { userId }, "self", "PUT");
         yield return linkService.Generate(UserEndpointsName.DeleteUser, new { userId }, "self", "DELETE");
-        yield return linkService.Generate(UserEndpointsName.AssignRole, new { userId }, "self", "POST");
-        yield return linkService.Generate(UserEndpointsName.UnassignRole, new { userId }, "self", "DELETE");
     }
 
     private static IEnumerable<Link> GenerateCreateLinks(ILinkService linkService, int userId)
@@ -193,31 +142,11 @@ public static class UserEndpointsDefinition
         yield return linkService.Generate(UserEndpointsName.GetUserById, new { userId }, "self", "GET");
         yield return linkService.Generate(UserEndpointsName.UpdateUser, new { userId }, "self", "PUT");
         yield return linkService.Generate(UserEndpointsName.DeleteUser, new { userId }, "self", "DELETE");
-        yield return linkService.Generate(UserEndpointsName.AssignRole, new { userId }, "self", "POST");
-        yield return linkService.Generate(UserEndpointsName.UnassignRole, new { userId }, "self", "DELETE");
     }
 
     private static IEnumerable<Link> GenerateUpdateLinks(ILinkService linkService, int userId)
     {
         yield return linkService.Generate(UserEndpointsName.GetUserById, new { userId }, "self", "GET");
         yield return linkService.Generate(UserEndpointsName.DeleteUser, new { userId }, "self", "DELETE");
-        yield return linkService.Generate(UserEndpointsName.AssignRole, new { userId }, "self", "POST");
-        yield return linkService.Generate(UserEndpointsName.UnassignRole, new { userId }, "self", "DELETE");
-    }
-
-    private static IEnumerable<Link> GenerateAssignRoleLinks(ILinkService linkService, int userId)
-    {
-        yield return linkService.Generate(UserEndpointsName.GetUserById, new { userId }, "self", "GET");
-        yield return linkService.Generate(UserEndpointsName.UpdateUser, new { userId }, "self", "PUT");
-        yield return linkService.Generate(UserEndpointsName.DeleteUser, new { userId }, "self", "DELETE");
-        yield return linkService.Generate(UserEndpointsName.UnassignRole, new { userId }, "self", "DELETE");
-    }
-
-    private static IEnumerable<Link> GenerateUnassignRoleLinks(ILinkService linkService, int userId)
-    {
-        yield return linkService.Generate(UserEndpointsName.GetUserById, new { userId }, "self", "GET");
-        yield return linkService.Generate(UserEndpointsName.UpdateUser, new { userId }, "self", "PUT");
-        yield return linkService.Generate(UserEndpointsName.DeleteUser, new { userId }, "self", "DELETE");
-        yield return linkService.Generate(UserEndpointsName.AssignRole, new { userId }, "self", "POST");
     }
 }
