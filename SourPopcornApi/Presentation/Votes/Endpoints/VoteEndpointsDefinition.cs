@@ -52,7 +52,7 @@ public static class VoteEndpointsDefinition
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = voteMapper.ToResponses(result.Value.Items);
         var links = GeneratePagedGetLinks(linkService, movieId, ratingId, result.Value.HasPrevious, result.Value.HasNext, result.Value.CurrentPage, result.Value.PageSize);
@@ -74,7 +74,7 @@ public static class VoteEndpointsDefinition
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = voteMapper.ToResponse(result.Value);
         var links = GenerateGetLinks(linkService, movieId, ratingId, response.Id);
@@ -106,7 +106,7 @@ public static class VoteEndpointsDefinition
             };
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = voteMapper.ToResponse(result.Value);
         var links = GenerateCreateLinks(linkService, movieId, ratingId, response.Id);
@@ -142,7 +142,7 @@ public static class VoteEndpointsDefinition
             };
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = voteMapper.ToResponse(result.Value);
         var links = GenerateUpdateLinks(linkService, movieId, ratingId, response.Id);

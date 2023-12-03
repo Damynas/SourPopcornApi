@@ -55,7 +55,7 @@ public static class RatingEndpointsDefinition
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = ratingMapper.ToResponses(result.Value.Items);
         var links = GeneratePagedGetLinks(linkService, movieId, result.Value.HasPrevious, result.Value.HasNext, result.Value.CurrentPage, result.Value.PageSize);
@@ -77,7 +77,7 @@ public static class RatingEndpointsDefinition
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = ratingMapper.ToResponse(result.Value);
         var links = GenerateGetLinks(linkService, movieId, response.Id);
@@ -109,7 +109,7 @@ public static class RatingEndpointsDefinition
             };
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = ratingMapper.ToResponse(result.Value);
         var links = GenerateCreateLinks(linkService, movieId, response.Id);
@@ -145,7 +145,7 @@ public static class RatingEndpointsDefinition
             };
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = ratingMapper.ToResponse(result.Value);
         var links = GenerateUpdateLinks(linkService, movieId, response.Id);
