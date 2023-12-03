@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231009073316_InitialMigration")]
+    [Migration("20231203141124_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -20,7 +20,10 @@ namespace Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.11")
+                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -60,8 +63,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.HasKey("Id")
-                        .HasName("pK_directors");
+                    b.HasKey("Id");
 
                     b.ToTable("directors", (string)null);
                 });
@@ -115,16 +117,18 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("releasedOn");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Writers")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("writers");
 
-                    b.HasKey("Id")
-                        .HasName("pK_movies");
+                    b.HasKey("Id");
 
-                    b.HasIndex("DirectorId")
-                        .HasDatabaseName("iX_movies_directorId");
+                    b.HasIndex("DirectorId");
 
                     b.ToTable("movies", (string)null);
                 });
@@ -167,14 +171,11 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("sourPopcorns");
 
-                    b.HasKey("Id")
-                        .HasName("pK_ratings");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CreatorId")
-                        .HasDatabaseName("iX_ratings_creatorId");
+                    b.HasIndex("CreatorId");
 
-                    b.HasIndex("MovieId")
-                        .HasDatabaseName("iX_ratings_movieId");
+                    b.HasIndex("MovieId");
 
                     b.ToTable("ratings", (string)null);
                 });
@@ -196,6 +197,10 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("displayName");
+
+                    b.Property<bool>("ForceLogin")
+                        .HasColumnType("boolean")
+                        .HasColumnName("forceLogin");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -220,8 +225,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("username");
 
-                    b.HasKey("Id")
-                        .HasName("pK_users");
+                    b.HasKey("Id");
 
                     b.ToTable("users", (string)null);
                 });
@@ -259,14 +263,11 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("ratingId");
 
-                    b.HasKey("Id")
-                        .HasName("pK_votes");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CreatorId")
-                        .HasDatabaseName("iX_votes_creatorId");
+                    b.HasIndex("CreatorId");
 
-                    b.HasIndex("RatingId")
-                        .HasDatabaseName("iX_votes_ratingId");
+                    b.HasIndex("RatingId");
 
                     b.ToTable("votes", (string)null);
                 });
@@ -277,8 +278,7 @@ namespace Infrastructure.Migrations
                         .WithMany("Movies")
                         .HasForeignKey("DirectorId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fK_movies_directors_directorId");
+                        .IsRequired();
 
                     b.Navigation("Director");
                 });
@@ -289,15 +289,13 @@ namespace Infrastructure.Migrations
                         .WithMany("Ratings")
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fK_ratings_users_creatorId");
+                        .IsRequired();
 
                     b.HasOne("Domain.Movies.Entities.Movie", "Movie")
                         .WithMany("Ratings")
                         .HasForeignKey("MovieId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fK_ratings_movies_movieId");
+                        .IsRequired();
 
                     b.Navigation("Creator");
 
@@ -310,15 +308,13 @@ namespace Infrastructure.Migrations
                         .WithMany("Votes")
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fK_votes_users_creatorId");
+                        .IsRequired();
 
                     b.HasOne("Domain.Ratings.Entities.Rating", "Rating")
                         .WithMany("Votes")
                         .HasForeignKey("RatingId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fK_votes_ratings_ratingId");
+                        .IsRequired();
 
                     b.Navigation("Creator");
 

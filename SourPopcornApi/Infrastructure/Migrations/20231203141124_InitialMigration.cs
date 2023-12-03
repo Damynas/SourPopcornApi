@@ -27,7 +27,7 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pK_directors", x => x.id);
+                    table.PrimaryKey("PK_directors", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -40,13 +40,14 @@ namespace Infrastructure.Migrations
                     passwordHash = table.Column<string>(type: "text", nullable: false),
                     displayName = table.Column<string>(type: "text", nullable: false),
                     roles = table.Column<string>(type: "text", nullable: false),
+                    forceLogin = table.Column<bool>(type: "boolean", nullable: false),
                     createdOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     modifiedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     isDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pK_users", x => x.id);
+                    table.PrimaryKey("PK_users", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -56,6 +57,7 @@ namespace Infrastructure.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     directorId = table.Column<int>(type: "integer", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
                     description = table.Column<string>(type: "text", nullable: false),
                     country = table.Column<string>(type: "text", nullable: false),
                     language = table.Column<string>(type: "text", nullable: false),
@@ -68,9 +70,9 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pK_movies", x => x.id);
+                    table.PrimaryKey("PK_movies", x => x.id);
                     table.ForeignKey(
-                        name: "fK_movies_directors_directorId",
+                        name: "FK_movies_directors_directorId",
                         column: x => x.directorId,
                         principalTable: "directors",
                         principalColumn: "id",
@@ -83,8 +85,8 @@ namespace Infrastructure.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    movieId = table.Column<int>(type: "integer", nullable: false),
                     creatorId = table.Column<int>(type: "integer", nullable: false),
+                    movieId = table.Column<int>(type: "integer", nullable: false),
                     sourPopcorns = table.Column<int>(type: "integer", nullable: false),
                     comment = table.Column<string>(type: "text", nullable: false),
                     createdOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -93,15 +95,15 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pK_ratings", x => x.id);
+                    table.PrimaryKey("PK_ratings", x => x.id);
                     table.ForeignKey(
-                        name: "fK_ratings_movies_movieId",
+                        name: "FK_ratings_movies_movieId",
                         column: x => x.movieId,
                         principalTable: "movies",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fK_ratings_users_creatorId",
+                        name: "FK_ratings_users_creatorId",
                         column: x => x.creatorId,
                         principalTable: "users",
                         principalColumn: "id",
@@ -114,8 +116,8 @@ namespace Infrastructure.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ratingId = table.Column<int>(type: "integer", nullable: false),
                     creatorId = table.Column<int>(type: "integer", nullable: false),
+                    ratingId = table.Column<int>(type: "integer", nullable: false),
                     isPositive = table.Column<bool>(type: "boolean", nullable: false),
                     createdOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     modifiedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -123,15 +125,15 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pK_votes", x => x.id);
+                    table.PrimaryKey("PK_votes", x => x.id);
                     table.ForeignKey(
-                        name: "fK_votes_ratings_ratingId",
+                        name: "FK_votes_ratings_ratingId",
                         column: x => x.ratingId,
                         principalTable: "ratings",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fK_votes_users_creatorId",
+                        name: "FK_votes_users_creatorId",
                         column: x => x.creatorId,
                         principalTable: "users",
                         principalColumn: "id",
@@ -139,27 +141,27 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "iX_movies_directorId",
+                name: "IX_movies_directorId",
                 table: "movies",
                 column: "directorId");
 
             migrationBuilder.CreateIndex(
-                name: "iX_ratings_creatorId",
+                name: "IX_ratings_creatorId",
                 table: "ratings",
                 column: "creatorId");
 
             migrationBuilder.CreateIndex(
-                name: "iX_ratings_movieId",
+                name: "IX_ratings_movieId",
                 table: "ratings",
                 column: "movieId");
 
             migrationBuilder.CreateIndex(
-                name: "iX_votes_creatorId",
+                name: "IX_votes_creatorId",
                 table: "votes",
                 column: "creatorId");
 
             migrationBuilder.CreateIndex(
-                name: "iX_votes_ratingId",
+                name: "IX_votes_ratingId",
                 table: "votes",
                 column: "ratingId");
         }
