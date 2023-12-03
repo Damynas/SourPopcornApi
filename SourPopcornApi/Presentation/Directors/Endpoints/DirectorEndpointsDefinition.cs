@@ -14,6 +14,7 @@ using Presentation.Directors.Constants;
 using Presentation.Directors.DataTransferObjects;
 using Presentation.Directors.Filters;
 using Presentation.Shared;
+using System.Globalization;
 using System.Text.Json;
 
 namespace Presentation.Directors.Endpoints;
@@ -71,7 +72,7 @@ public static class DirectorEndpointsDefinition
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = directorMapper.ToResponse(result.Value);
         var links = GenerateGetLinks(linkService, response.Id);
@@ -84,7 +85,7 @@ public static class DirectorEndpointsDefinition
         [FromServices] IDirectorService directorService, [FromServices] IDirectorMapper directorMapper, [FromServices] ILinkService linkService,
         [FromBody] CreateDirectorRequestBody requestBody, CancellationToken cancellationToken = default)
     {
-        var request = new CreateDirectorRequest(requestBody.Name, requestBody.Country, requestBody.BornOn);
+        var request = new CreateDirectorRequest(requestBody.Name, requestBody.Country, DateTime.Parse(requestBody.BornOn, CultureInfo.InvariantCulture, DateTimeStyles.None));
         var result = await directorService.CreateDirectorAsync(request, cancellationToken);
 
         var response = directorMapper.ToResponse(result.Value);
@@ -98,13 +99,13 @@ public static class DirectorEndpointsDefinition
         [FromServices] IDirectorService directorService, [FromServices] IDirectorMapper directorMapper, [FromServices] ILinkService linkService,
         [FromRoute] int directorId, [FromBody] UpdateDirectorRequestBody requestBody, CancellationToken cancellationToken = default)
     {
-        var request = new UpdateDirectorRequest(directorId, requestBody.Name, requestBody.Country, requestBody.BornOn);
+        var request = new UpdateDirectorRequest(directorId, requestBody.Name, requestBody.Country, DateTime.Parse(requestBody.BornOn, CultureInfo.InvariantCulture, DateTimeStyles.None));
         var result = await directorService.UpdateDirectorAsync(request, cancellationToken);
         if (result.IsFailure)
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
 
         if (result.Value is null)
-            return TypedResults.Problem("Successfull result value cannot be null.");
+            return TypedResults.Problem("Successful result value cannot be null.");
 
         var response = directorMapper.ToResponse(result.Value);
         var links = GenerateUpdateLinks(linkService, response.Id);
