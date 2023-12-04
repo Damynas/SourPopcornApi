@@ -1,7 +1,7 @@
 version: '3.8'
 
 networks:
-    sourpopcorn-network:
+    sourpopcorn-api-network:
         driver: bridge
 
 services:
