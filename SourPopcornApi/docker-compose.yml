@@ -30,7 +30,7 @@ services:
         volumes:
             - ${USERPROFILE}\.aspnet\https:/https/
         networks:
-            - sourpopcorn-network
+            - sourpopcorn-api-network
     
     sourpopcorn-database:
         image: postgres:latest
@@ -45,7 +45,7 @@ services:
         volumes:
             - sourpopcorn-data:/var/lib/postgresql/data
         networks:
-            - sourpopcorn-network
+            - sourpopcorn-api-network
 
 volumes:
     sourpopcorn-data:
