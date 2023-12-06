@@ -13,6 +13,7 @@ services:
         ports:
             - "8080:80"
             - "8081:443"
+        restart: always
         build:
             context: .
             dockerfile: Dockerfile
