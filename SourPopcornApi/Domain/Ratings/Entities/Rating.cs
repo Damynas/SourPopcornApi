@@ -20,5 +20,5 @@ public class Rating(int id, DateTime createdOn, DateTime modifiedOn, bool isDele
 
     public virtual Movie Movie { get; set; } = null!;
 
-    public virtual ICollection<Vote> Votes { get; } = new List<Vote>();
+    public virtual IEnumerable<Vote> Votes { get; } = Enumerable.Empty<Vote>();
 }

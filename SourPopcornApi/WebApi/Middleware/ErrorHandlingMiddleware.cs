@@ -12,7 +12,16 @@
                 }
                 catch (Exception exception)
                 {
-                    context.Response.StatusCode = 500;
+                    context.Response.ContentType = "text/plain";
+
+                    if (exception is BadHttpRequestException)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                        await context.Response.WriteAsync("Request body is incorrect.");
+                        return;
+                    }
+
+                    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                     await context.Response.WriteAsync("An error has occurred.");
                     await context.Response.WriteAsync($"Error message: {exception.Message}");
                 }

@@ -25,5 +25,5 @@ public class Movie(int id, DateTime createdOn, DateTime modifiedOn, bool isDelet
     // Navigation properties
     public virtual Director Director { get; set; } = null!;
 
-    public virtual ICollection<Rating> Ratings { get; } = new List<Rating>();
+    public virtual IEnumerable<Rating> Ratings { get; } = Enumerable.Empty<Rating>();
 }

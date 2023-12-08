@@ -7,5 +7,5 @@ public interface IMapper<TEntity, TResponse>
         where TResponse : IResponse
 {
     TResponse ToResponse(TEntity entity);
-    ICollection<TResponse> ToResponses(ICollection<TEntity> entities);
+    IEnumerable<TResponse> ToResponses(IEnumerable<TEntity> entities);
 }

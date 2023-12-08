@@ -6,13 +6,16 @@ using Domain.Auth.DataTransferObjects.Requests;
 using Domain.Auth.DataTransferObjects.Responses;
 using Domain.Shared.Constants;
 using Domain.Users.DataTransferObjects.Requests;
+using Domain.Users.DataTransferObjects.Responses;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Auth.Constants;
 using Presentation.Auth.DataTransferObjects;
 using Presentation.Auth.Filters;
+using Presentation.Shared;
 using Presentation.Shared.Helpers;
 
 namespace Presentation.Auth.Endpoints
@@ -21,25 +24,44 @@ namespace Presentation.Auth.Endpoints
     {
         public static void AddAuthEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
         {
-            var auth = endpointRouteBuilder.MapGroup("/api").WithTags("Auth");
+            var auth = endpointRouteBuilder.MapGroup("/api").WithTags("Auth").WithOpenApi();
+
             auth.MapPost("/auth/login", LoginAsync)
                 .WithName(AuthEndpointName.Login)
                 .AddEndpointFilter<LoginValidationFilter>()
-                .AllowAnonymous();
+                .AllowAnonymous()
+                .Produces<TokenResponse>(StatusCodes.Status200OK, "application/json")
+                .Produces<string>(StatusCodes.Status400BadRequest, "text/plain")
+                .Produces<string>(StatusCodes.Status404NotFound, "text/plain")
+                .Produces<ValidationResponse>(StatusCodes.Status422UnprocessableEntity, "application/json");
+
             auth.MapPost("/auth/logout", LogoutAsync)
                 .WithName(AuthEndpointName.Logout)
-                .RequireAuthorization(Policy.User);
+                .RequireAuthorization(Policy.User)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status401Unauthorized)
+                .Produces(StatusCodes.Status403Forbidden)
+                .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
             auth.MapPost("/auth/register", RegisterAsync)
                 .WithName(AuthEndpointName.Register)
                 .AddEndpointFilter<RegisterValidationFilter>()
-                .AllowAnonymous();
+                .AllowAnonymous()
+                .Produces<UserResponse>(StatusCodes.Status201Created, "application/json")
+                .Produces<string>(StatusCodes.Status400BadRequest, "text/plain")
+                .Produces<ValidationResponse>(StatusCodes.Status422UnprocessableEntity, "application/json");
 
             auth.MapPost("/auth/refresh_access_token", RefreshAccessTokenAsync)
                 .WithName(AuthEndpointName.RefreshAccessToken)
-                .AllowAnonymous();
+                .AllowAnonymous()
+                .Produces<TokenResponse>(StatusCodes.Status200OK, "application/json")
+                .Produces(StatusCodes.Status401Unauthorized);
+
             auth.MapPost("/auth/ping", PingAsync)
                 .WithName(AuthEndpointName.Ping)
-                .AllowAnonymous();
+                .AllowAnonymous()
+                .Produces<PingResponse>(StatusCodes.Status200OK, "application/json")
+                .Produces(StatusCodes.Status401Unauthorized);
         }
 
         private static async Task<IResult> LoginAsync(HttpContext httpContext,

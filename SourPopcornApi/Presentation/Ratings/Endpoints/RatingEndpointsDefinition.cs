@@ -24,24 +24,49 @@ public static class RatingEndpointsDefinition
 {
     public static void AddRatingEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var ratings = endpointRouteBuilder.MapGroup("/api/movies/{movieId}").WithTags("Ratings");
+        var ratings = endpointRouteBuilder.MapGroup("/api/movies/{movieId}").WithTags("Ratings").WithOpenApi();
+
         ratings.MapGet("/ratings", GetMovieRatingsAsync)
             .WithName(RatingEndpointsName.GetMovieRatings)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<IEnumerable<RatingResponse>>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         ratings.MapGet("/ratings/{ratingId}", GetMovieRatingByIdAsync)
             .WithName(RatingEndpointsName.GetMovieRatingById)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<RatingResponse>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
         ratings.MapPost("/ratings", CreateMovieRatingAsync)
             .WithName(RatingEndpointsName.CreateMovieRating)
             .AddEndpointFilter<CreateMovieRatingValidationFilter>()
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<RatingResponse>>(StatusCodes.Status201Created, "application/json")
+            .Produces<string>(StatusCodes.Status400BadRequest, "text/plain")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         ratings.MapPut("/ratings/{ratingId}", UpdateMovieRatingAsync)
             .WithName(RatingEndpointsName.UpdateMovieRating)
             .AddEndpointFilter<UpdateMovieRatingValidationFilter>()
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<RatingResponse>>(StatusCodes.Status200OK, "application/json")
+            .Produces<string>(StatusCodes.Status400BadRequest, "text/plain")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
         ratings.MapDelete("/ratings/{ratingId}", DeleteMovieRatingAsync)
             .WithName(RatingEndpointsName.DeleteMovieRating)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
     }
 
     private static async Task<IResult> GetMovieRatingsAsync(HttpContext httpContext,
@@ -59,7 +84,7 @@ public static class RatingEndpointsDefinition
 
         var response = ratingMapper.ToResponses(result.Value.Items);
         var links = GeneratePagedGetLinks(linkService, movieId, result.Value.HasPrevious, result.Value.HasNext, result.Value.CurrentPage, result.Value.PageSize);
-        var endpointResult = new EndpointResult<ICollection<RatingResponse>>(response, links.ToList());
+        var endpointResult = new EndpointResult<IEnumerable<RatingResponse>>(response, links.ToList());
 
         var paginationMetadata = new PaginationMetadata(result.Value.TotalCount, result.Value.PageSize, result.Value.CurrentPage);
         httpContext.Response.Headers.Append("Pagination", JsonSerializer.Serialize(paginationMetadata));

@@ -11,7 +11,7 @@ public class DirectorMapper : IDirectorMapper
         return new DirectorResponse(director.Id, director.CreatedOn, director.ModifiedOn, director.Name, director.Country, director.BornOn);
     }
 
-    public ICollection<DirectorResponse> ToResponses(ICollection<Director> directors)
+    public IEnumerable<DirectorResponse> ToResponses(IEnumerable<Director> directors)
     {
         return directors.Select(ToResponse).ToList();
     }

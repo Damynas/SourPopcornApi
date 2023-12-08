@@ -13,7 +13,7 @@ public class MovieMapper : IMovieMapper
             movie.DirectorId, movie.Title, movie.Description, movie.Country, movie.Language, movie.ReleasedOn, movie.Writers, movie.Actors);
     }
 
-    public ICollection<MovieResponse> ToResponses(ICollection<Movie> movies)
+    public IEnumerable<MovieResponse> ToResponses(IEnumerable<Movie> movies)
     {
         return movies.Select(ToResponse).ToList();
     }

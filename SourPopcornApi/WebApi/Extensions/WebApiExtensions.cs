@@ -16,19 +16,7 @@ public static class WebApiExtensions
             .AddInfrastructure(builder.Environment, builder.Configuration)
             .AddPresentation();
 
-        // Add CORS
-        var allowedOrigins = builder.Configuration.GetSection("CORS:AllowedOrigins");
-        if (allowedOrigins.Value is null)
-            throw new ArgumentException("CORS policy configuration section is incorrect.");
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy(name: CorsPolicyName,
-                builder => builder
-                    .WithOrigins(allowedOrigins.Value)
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials());
-        });
+        AddCors(builder.Configuration, builder.Services);
 
         builder.Services.AddAuthMiddleware(builder.Configuration);
     }
@@ -44,10 +32,28 @@ public static class WebApiExtensions
         app.UseAuthorization();
 
         app.AddEndpoints();
+        app.AddSwagger();
     }
 
     public static void RunServices(this WebApplication app)
     {
         app.Services.RunDatabaseMigration();
+    }
+
+    private static void AddCors(ConfigurationManager configuration, IServiceCollection services)
+    {
+        var allowedOrigins = configuration.GetSection("CORS:AllowedOrigins");
+        if (allowedOrigins.Value is null)
+            throw new ArgumentException("CORS policy configuration section is incorrect.");
+        
+        services.AddCors(options =>
+        {
+            options.AddPolicy(name: CorsPolicyName,
+                builder => builder
+                    .WithOrigins(allowedOrigins.Value)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+        });
     }
 }

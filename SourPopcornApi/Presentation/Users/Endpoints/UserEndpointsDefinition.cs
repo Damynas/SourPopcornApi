@@ -22,24 +22,49 @@ public static class UserEndpointsDefinition
 {
     public static void AddUserEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var users = endpointRouteBuilder.MapGroup("/api").WithTags("Users");
+        var users = endpointRouteBuilder.MapGroup("/api").WithTags("Users").WithOpenApi();
+
         users.MapGet("/users", GetUsersAsync)
             .WithName(UserEndpointsName.GetUsers)
-            .RequireAuthorization(Policy.Admin);
+            .RequireAuthorization(Policy.Admin)
+            .Produces<EndpointResult<IEnumerable<UserResponse>>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         users.MapGet("/users/{userId}", GetUserByIdAsync)
             .WithName(UserEndpointsName.GetUserById)
-            .RequireAuthorization(Policy.Admin);
+            .RequireAuthorization(Policy.Admin)
+            .Produces<EndpointResult<UserResponse>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
         users.MapPost("/users", CreateUserAsync)
             .WithName(UserEndpointsName.CreateUser)
             .AddEndpointFilter<CreateUserValidationFilter>()
-            .RequireAuthorization(Policy.Admin);
+            .RequireAuthorization(Policy.Admin)
+            .Produces<EndpointResult<UserResponse>>(StatusCodes.Status201Created, "application/json")
+            .Produces<string>(StatusCodes.Status400BadRequest, "text/plain")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         users.MapPut("/users/{userId}", UpdateUserAsync)
             .WithName(UserEndpointsName.UpdateUser)
             .AddEndpointFilter<UpdateUserValidationFilter>()
-            .RequireAuthorization(Policy.Admin);
+            .RequireAuthorization(Policy.Admin)
+            .Produces<EndpointResult<UserResponse>>(StatusCodes.Status200OK, "application/json")
+            .Produces<string>(StatusCodes.Status400BadRequest, "text/plain")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
         users.MapDelete("/users/{userId}", DeleteUserAsync)
             .WithName(UserEndpointsName.DeleteUser)
-            .RequireAuthorization(Policy.Admin);
+            .RequireAuthorization(Policy.Admin)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
     }
 
     private static async Task<IResult> GetUsersAsync(HttpContext httpContext,
@@ -52,7 +77,7 @@ public static class UserEndpointsDefinition
 
         var response = userMapper.ToResponses(result.Value.Items);
         var links = GeneratePagedGetLinks(linkService, result.Value.HasPrevious, result.Value.HasNext, result.Value.CurrentPage, result.Value.PageSize);
-        var endpointResult = new EndpointResult<ICollection<UserResponse>>(response, links.ToList());
+        var endpointResult = new EndpointResult<IEnumerable<UserResponse>>(response, links.ToList());
 
         var paginationMetadata = new PaginationMetadata(result.Value.TotalCount, result.Value.PageSize, result.Value.CurrentPage);
         httpContext.Response.Headers.Append("Pagination", JsonSerializer.Serialize(paginationMetadata));

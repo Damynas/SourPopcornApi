@@ -23,22 +23,45 @@ public static class VoteEndpointsDefinition
 {
     public static void AddVoteEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var votes = endpointRouteBuilder.MapGroup("/api/movies/{movieId}/ratings/{ratingId}").WithTags("Votes");
+        var votes = endpointRouteBuilder.MapGroup("/api/movies/{movieId}/ratings/{ratingId}").WithTags("Votes").WithOpenApi();
+
         votes.MapGet("/votes", GetMovieRatingVotesAsync)
             .WithName(VoteEndpointsName.GetMovieRatingVotes)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<IEnumerable<VoteResponse>>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         votes.MapGet("/votes/{voteId}", GetMovieRatingVoteByIdAsync)
             .WithName(VoteEndpointsName.GetMovieRatingVoteById)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<VoteResponse>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
         votes.MapPost("/votes", CreateMovieRatingVoteAsync)
             .WithName(VoteEndpointsName.CreateMovieRatingVote)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<VoteResponse>>(StatusCodes.Status201Created, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         votes.MapPut("/votes/{voteId}", UpdateMovieRatingVoteAsync)
             .WithName(VoteEndpointsName.UpdateMovieRatingVote)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<VoteResponse>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
         votes.MapDelete("/votes/{voteId}", DeleteMovieRatingVoteAsync)
             .WithName(VoteEndpointsName.DeleteMovieRatingVote)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
     }
 
     private static async Task<IResult> GetMovieRatingVotesAsync(HttpContext httpContext,
@@ -56,7 +79,7 @@ public static class VoteEndpointsDefinition
 
         var response = voteMapper.ToResponses(result.Value.Items);
         var links = GeneratePagedGetLinks(linkService, movieId, ratingId, result.Value.HasPrevious, result.Value.HasNext, result.Value.CurrentPage, result.Value.PageSize);
-        var endpointResult = new EndpointResult<ICollection<VoteResponse>>(response, links.ToList());
+        var endpointResult = new EndpointResult<IEnumerable<VoteResponse>>(response, links.ToList());
 
         var paginationMetadata = new PaginationMetadata(result.Value.TotalCount, result.Value.PageSize, result.Value.CurrentPage);
         httpContext.Response.Headers.Append("Pagination", JsonSerializer.Serialize(paginationMetadata));

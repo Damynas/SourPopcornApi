@@ -23,25 +23,49 @@ public static class DirectorEndpointsDefinition
 {
     public static void AddDirectorEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var directors = endpointRouteBuilder.MapGroup("/api").WithTags("Directors");
+        var directors = endpointRouteBuilder.MapGroup("/api").WithTags("Directors").WithOpenApi();
 
         directors.MapGet("/directors", GetDirectorsAsync)
             .WithName(DirectorEndpointsName.GetDirectors)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<IEnumerable<DirectorResponse>>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         directors.MapGet("/directors/{directorId}", GetDirectorByIdAsync)
             .WithName(DirectorEndpointsName.GetDirectorById)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<DirectorResponse>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
         directors.MapPost("/directors", CreateDirectorAsync)
             .WithName(DirectorEndpointsName.CreateDirector)
             .AddEndpointFilter<CreateDirectorValidationFilter>()
-            .RequireAuthorization(Policy.Moderator);
+            .RequireAuthorization(Policy.Moderator)
+            .Produces<EndpointResult<DirectorResponse>>(StatusCodes.Status201Created, "application/json")
+            .Produces<string>(StatusCodes.Status400BadRequest, "text/plain")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         directors.MapPut("/directors/{directorId}", UpdateDirectorAsync)
             .WithName(DirectorEndpointsName.UpdateDirector)
             .AddEndpointFilter<UpdateDirectorValidationFilter>()
-            .RequireAuthorization(Policy.Moderator);
+            .RequireAuthorization(Policy.Moderator)
+            .Produces<EndpointResult<DirectorResponse>>(StatusCodes.Status200OK, "application/json")
+            .Produces<string>(StatusCodes.Status400BadRequest, "text/plain")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
         directors.MapDelete("/directors/{directorId}", DeleteDirectorAsync)
             .WithName(DirectorEndpointsName.DeleteDirector)
-            .RequireAuthorization(Policy.Moderator);
+            .RequireAuthorization(Policy.Moderator)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
     }
 
     private static async Task<IResult> GetDirectorsAsync(HttpContext httpContext,
@@ -54,7 +78,7 @@ public static class DirectorEndpointsDefinition
 
         var response = directorMapper.ToResponses(result.Value.Items);
         var links = GeneratePagedGetLinks(linkService, result.Value.HasPrevious, result.Value.HasNext, result.Value.CurrentPage, result.Value.PageSize);
-        var endpointResult = new EndpointResult<ICollection<DirectorResponse>>(response, links.ToList());
+        var endpointResult = new EndpointResult<IEnumerable<DirectorResponse>>(response, links.ToList());
 
         var paginationMetadata = new PaginationMetadata(result.Value.TotalCount, result.Value.PageSize, result.Value.CurrentPage);
         httpContext.Response.Headers.Append("Pagination", JsonSerializer.Serialize(paginationMetadata));

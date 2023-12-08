@@ -11,7 +11,7 @@ public class RatingMapper : IRatingMapper
         return new RatingResponse(rating.Id, rating.CreatedOn, rating.ModifiedOn, rating.MovieId, rating.CreatorId, rating.SourPopcorns, rating.Comment);
     }
 
-    public ICollection<RatingResponse> ToResponses(ICollection<Rating> ratings)
+    public IEnumerable<RatingResponse> ToResponses(IEnumerable<Rating> ratings)
     {
         return ratings.Select(ToResponse).ToList();
     }

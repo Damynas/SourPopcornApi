@@ -23,24 +23,49 @@ public static class MovieEndpointsDefinition
 {
     public static void AddMovieEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var movies = endpointRouteBuilder.MapGroup("/api").WithTags("Movies");
+        var movies = endpointRouteBuilder.MapGroup("/api").WithTags("Movies").WithOpenApi();
+
         movies.MapGet("movies", GetMoviesAsync)
             .WithName(MovieEndpointsName.GetMovies)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<IEnumerable<MovieResponse>>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         movies.MapGet("/movies/{movieId}", GetMovieByIdAsync)
             .WithName(MovieEndpointsName.GetMovieById)
-            .RequireAuthorization(Policy.User);
+            .RequireAuthorization(Policy.User)
+            .Produces<EndpointResult<MovieResponse>>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
         movies.MapPost("/movies", CreateMovieAsync)
             .WithName(MovieEndpointsName.CreateMovie)
             .AddEndpointFilter<CreateMovieValidationFilter>()
-            .RequireAuthorization(Policy.Moderator);
+            .RequireAuthorization(Policy.Moderator)
+            .Produces<EndpointResult<MovieResponse>>(StatusCodes.Status201Created, "application/json")
+            .Produces<string>(StatusCodes.Status400BadRequest, "text/plain")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         movies.MapPut("/movies/{movieId}", UpdateMovieAsync)
             .WithName(MovieEndpointsName.UpdateMovie)
             .AddEndpointFilter<UpdateMovieValidationFilter>()
-            .RequireAuthorization(Policy.Moderator);
+            .RequireAuthorization(Policy.Moderator)
+            .Produces<EndpointResult<MovieResponse>>(StatusCodes.Status200OK, "application/json")
+            .Produces<string>(StatusCodes.Status400BadRequest, "text/plain")
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
+
         movies.MapDelete("/movies/{movieId}", DeleteMovieAsync)
             .WithName(MovieEndpointsName.DeleteMovie)
-            .RequireAuthorization(Policy.Moderator);
+            .RequireAuthorization(Policy.Moderator)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<string>(StatusCodes.Status404NotFound, "text/plain");
     }
 
     private static async Task<IResult> GetMoviesAsync(HttpContext httpContext,
@@ -53,7 +78,7 @@ public static class MovieEndpointsDefinition
 
         var response = movieMapper.ToResponses(result.Value.Items);
         var links = GeneratePagedGetLinks(linkService, result.Value.HasPrevious, result.Value.HasNext, result.Value.CurrentPage, result.Value.PageSize);
-        var endpointResult = new EndpointResult<ICollection<MovieResponse>>(response, links.ToList());
+        var endpointResult = new EndpointResult<IEnumerable<MovieResponse>>(response, links.ToList());
 
         var paginationMetadata = new PaginationMetadata(result.Value.TotalCount, result.Value.PageSize, result.Value.CurrentPage);
         httpContext.Response.Headers.Append("Pagination", JsonSerializer.Serialize(paginationMetadata));

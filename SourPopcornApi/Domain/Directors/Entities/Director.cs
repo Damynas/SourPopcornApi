@@ -12,5 +12,5 @@ public class Director(int id, DateTime createdOn, DateTime modifiedOn, bool isDe
     public required DateTime BornOn { get; set; }
 
     // Navigation properties
-    public virtual ICollection<Movie> Movies { get; } = new List<Movie>();
+    public virtual IEnumerable<Movie> Movies { get; } = Enumerable.Empty<Movie>();
 }

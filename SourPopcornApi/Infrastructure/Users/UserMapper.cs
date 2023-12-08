@@ -11,7 +11,7 @@ public class UserMapper : IUserMapper
         return new UserResponse(user.Id, user.CreatedOn, user.ModifiedOn, user.Username, user.DisplayName, user.Roles);
     }
 
-    public ICollection<UserResponse> ToResponses(ICollection<User> users)
+    public IEnumerable<UserResponse> ToResponses(IEnumerable<User> users)
     {
         return users.Select(ToResponse).ToList();
     }

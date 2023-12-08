@@ -25,12 +25,9 @@ public class ValidationFilter<TEntity> : IEndpointFilter
 
     private static List<object> TransformValidationErrors(IDictionary<string, string[]> validationErrors)
     {
-        return validationErrors.Select(entry => new
-        {
-            PropertyName = entry.Key,
-            Value = string.Join(" ", entry.Value)
-        }).Cast<object>().ToList();
+        return validationErrors.Select(entry => new ValidationResponse(entry.Key, string.Join(" ", entry.Value)))
+            .Cast<object>().ToList();
     }
 }
 
-
+public sealed record ValidationResponse(string PropertyName, string Value);

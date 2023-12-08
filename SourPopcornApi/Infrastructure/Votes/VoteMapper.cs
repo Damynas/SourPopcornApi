@@ -11,7 +11,7 @@ public class VoteMapper : IVoteMapper
         return new VoteResponse(vote.Id, vote.CreatedOn, vote.ModifiedOn, vote.RatingId, vote.CreatorId, vote.IsPositive);
     }
 
-    public ICollection<VoteResponse> ToResponses(ICollection<Vote> votes)
+    public IEnumerable<VoteResponse> ToResponses(IEnumerable<Vote> votes)
     {
         return votes.Select(ToResponse).ToList();
     }
