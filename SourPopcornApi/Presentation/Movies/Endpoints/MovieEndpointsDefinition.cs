@@ -25,7 +25,7 @@ public static class MovieEndpointsDefinition
     {
         var movies = endpointRouteBuilder.MapGroup("/api").WithTags("Movies").WithOpenApi();
 
-        movies.MapGet("movies", GetMoviesAsync)
+        movies.MapGet("/movies", GetMoviesAsync)
             .WithName(MovieEndpointsName.GetMovies)
             .RequireAuthorization(Policy.User)
             .Produces<EndpointResult<IEnumerable<MovieResponse>>>(StatusCodes.Status200OK, "application/json")

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231203141124_InitialMigration")]
+    [Migration("20231208221028_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -119,7 +119,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("title");
 
                     b.Property<string>("Writers")
                         .IsRequired()

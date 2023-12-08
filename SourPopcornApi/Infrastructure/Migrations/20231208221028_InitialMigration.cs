@@ -57,7 +57,7 @@ namespace Infrastructure.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     directorId = table.Column<int>(type: "integer", nullable: false),
-                    Title = table.Column<string>(type: "text", nullable: false),
+                    title = table.Column<string>(type: "text", nullable: false),
                     description = table.Column<string>(type: "text", nullable: false),
                     country = table.Column<string>(type: "text", nullable: false),
                     language = table.Column<string>(type: "text", nullable: false),
