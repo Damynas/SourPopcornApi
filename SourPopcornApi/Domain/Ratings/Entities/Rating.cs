@@ -16,9 +16,9 @@ public class Rating(int id, DateTime createdOn, DateTime modifiedOn, bool isDele
     public required string Comment { get; set; }
 
     // Navigation properties
-    public virtual User Creator { get; set; } = null!;
+    public virtual User? Creator { get; set; }
 
-    public virtual Movie Movie { get; set; } = null!;
+    public virtual Movie? Movie { get; set; }
 
     public virtual IEnumerable<Vote> Votes { get; } = Enumerable.Empty<Vote>();
 }
