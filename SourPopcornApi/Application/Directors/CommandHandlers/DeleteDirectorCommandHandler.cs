@@ -43,7 +43,7 @@ public class DeleteDirectorCommandHandler(
             movieRepository.Update(movie);
         });
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result.Success();
     }

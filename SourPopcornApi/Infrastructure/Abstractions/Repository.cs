@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Abstractions;
 
-public abstract class Repository<TEntity> where TEntity : Entity
+public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : Entity
 {
     protected readonly IApplicationDbContext _dbContext;
 

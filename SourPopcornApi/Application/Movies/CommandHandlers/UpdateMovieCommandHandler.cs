@@ -23,7 +23,7 @@ public class UpdateMovieCommandHandler(IDirectorRepository directorRepository, I
 
 
         movie.ModifiedOn = DateTime.UtcNow;
-        movie.Director = director;
+        movie.DirectorId = director.Id;
         movie.Title = command.Request.Title;
         movie.Description = command.Request.Description;
         movie.Country = command.Request.Country;
@@ -33,7 +33,7 @@ public class UpdateMovieCommandHandler(IDirectorRepository directorRepository, I
         movie.Actors = command.Request.Actors;
 
         movieRepository.Update(movie);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result<Movie?>.Success(movie);
     }

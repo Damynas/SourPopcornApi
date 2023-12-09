@@ -30,7 +30,7 @@ public class CreateMovieCommandHandler(IDirectorRepository directorRepository, I
         };
 
         movieRepository.Add(movie);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result<Movie?>.Success(movie);
     }

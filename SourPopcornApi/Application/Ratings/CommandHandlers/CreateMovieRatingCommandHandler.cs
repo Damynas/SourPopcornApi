@@ -30,7 +30,7 @@ public class CreateMovieRatingCommandHandler(
         };
 
         ratingRepository.Add(rating);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result<Rating?>.Success(rating);
     }

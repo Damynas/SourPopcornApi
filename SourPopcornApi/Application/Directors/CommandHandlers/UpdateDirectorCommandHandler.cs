@@ -21,7 +21,7 @@ public class UpdateDirectorCommandHandler(IDirectorRepository directorRepository
         director.BornOn = command.Request.BornOn.ToUniversalTime();
 
         directorRepository.Update(director);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result<Director?>.Success(director);
     }

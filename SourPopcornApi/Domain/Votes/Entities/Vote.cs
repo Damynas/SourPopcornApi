@@ -13,7 +13,7 @@ public class Vote(int id, DateTime createdOn, DateTime modifiedOn, bool isDelete
     public required bool IsPositive { get; set; }
 
     // Navigation properties
-    public virtual Rating? Rating { get; set; }
+    public virtual Rating? Rating { get; }
 
-    public virtual User? Creator { get; set; }
+    public virtual User? Creator { get; }
 }

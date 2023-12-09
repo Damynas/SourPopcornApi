@@ -33,7 +33,7 @@ public class UpdateMovieRatingVoteCommandHandler(IMovieRepository movieRepositor
         vote.IsPositive = command.Request.IsPositive;
 
         voteRepository.Update(vote);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result<Vote?>.Success(vote);
     }

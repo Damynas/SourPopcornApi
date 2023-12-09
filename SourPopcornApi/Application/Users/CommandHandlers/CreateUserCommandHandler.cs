@@ -22,7 +22,7 @@ public class CreateUserCommandHandler(IUserRepository userRepository, IUnitOfWor
         };
 
         userRepository.Add(user);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result<User>.Success(user);
     }

@@ -20,7 +20,7 @@ public class LoginCommandHandler(IUserRepository userRepository, IUnitOfWork uni
         user.ForceLogin = false;
 
         userRepository.Update(user);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result<User?>.Success(user);
     }

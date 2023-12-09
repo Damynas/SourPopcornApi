@@ -23,7 +23,7 @@ public class UpdateUserCommandHandler(IUserRepository userRepository, IUnitOfWor
         }
 
         userRepository.Update(user);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result<User?>.Success(user);
     }

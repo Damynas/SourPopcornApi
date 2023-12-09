@@ -18,7 +18,7 @@ public class DeleteUserCommandHandler(IUserRepository userRepository, IUnitOfWor
         user.IsDeleted = true;
 
         userRepository.Update(user);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result.Success();
     }

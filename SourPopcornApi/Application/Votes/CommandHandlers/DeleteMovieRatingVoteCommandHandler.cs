@@ -32,7 +32,7 @@ public class DeleteMovieRatingVoteCommandHandler(IMovieRepository movieRepositor
         vote.IsDeleted = true;
 
         voteRepository.Update(vote);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result.Success();
     }

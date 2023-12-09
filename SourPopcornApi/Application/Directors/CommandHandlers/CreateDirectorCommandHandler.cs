@@ -19,7 +19,7 @@ public class CreateDirectorCommandHandler(IDirectorRepository directorRepository
         };
 
         directorRepository.Add(director);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result<Director>.Success(director);
     }

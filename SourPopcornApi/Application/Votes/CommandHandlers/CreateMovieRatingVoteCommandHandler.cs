@@ -33,7 +33,7 @@ public class CreateMovieRatingVoteCommandHandler(
         };
 
         voteRepository.Add(vote);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result<Vote?>.Success(vote);
     }

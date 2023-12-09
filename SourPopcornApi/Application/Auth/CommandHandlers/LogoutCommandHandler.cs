@@ -19,7 +19,7 @@ public class LogoutCommandHandler(IUserRepository userRepository, IUnitOfWork un
         user.ForceLogin = true;
 
         userRepository.Update(user);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result.Success();
     }

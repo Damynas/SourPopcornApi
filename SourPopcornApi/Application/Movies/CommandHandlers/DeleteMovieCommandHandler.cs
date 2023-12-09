@@ -36,7 +36,7 @@ public class DeleteMovieCommandHandler(
             ratingRepository.Update(rating);
         });
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         return Result.Success();
     }
