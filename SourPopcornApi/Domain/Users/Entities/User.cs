@@ -17,7 +17,7 @@ public class User(int id, DateTime createdOn, DateTime modifiedOn, bool isDelete
     public required bool ForceLogin { get; set; }
 
     // Navigation properties
-    public virtual IEnumerable<Rating> Ratings { get; } = Enumerable.Empty<Rating>();
+    public virtual ICollection<Rating> Ratings { get; } = new List<Rating>();
 
-    public virtual IEnumerable<Vote> Votes { get; } = Enumerable.Empty<Vote>();
+    public virtual ICollection<Vote> Votes { get; } = new List<Vote>();
 }
