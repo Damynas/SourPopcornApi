@@ -45,7 +45,8 @@ public static class VoteEndpointsDefinition
             .RequireAuthorization(Policy.User)
             .Produces<EndpointResult<VoteResponse>>(StatusCodes.Status201Created, "application/json")
             .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status403Forbidden);
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces(StatusCodes.Status409Conflict);
 
         votes.MapPut("/votes/{voteId}", UpdateMovieRatingVoteAsync)
             .WithName(VoteEndpointsName.UpdateMovieRatingVote)
@@ -160,7 +161,7 @@ public static class VoteEndpointsDefinition
             return result.Error.Code switch
             {
                 ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
-                ErrorCode.Forbidden => TypedResults.UnprocessableEntity(result.Error.Message),
+                ErrorCode.Forbidden => TypedResults.Conflict(result.Error.Message),
                 _ => TypedResults.Problem("Failed result error value is incorrect.")
             };
 
@@ -196,7 +197,7 @@ public static class VoteEndpointsDefinition
             return result.Error.Code switch
             {
                 ErrorCode.NullValue => TypedResults.NotFound(result.Error.Message),
-                ErrorCode.Forbidden => TypedResults.UnprocessableEntity(result.Error.Message),
+                ErrorCode.Forbidden => TypedResults.Forbid(),
                 _ => TypedResults.Problem("Failed result error value is incorrect.")
             };
 

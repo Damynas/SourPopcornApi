@@ -25,6 +25,7 @@ public class UpdateMovieCommandHandler(IDirectorRepository directorRepository, I
         movie.ModifiedOn = DateTime.UtcNow;
         movie.DirectorId = director.Id;
         movie.Title = command.Request.Title;
+        movie.PosterLink = command.Request.PosterLink;
         movie.Description = command.Request.Description;
         movie.Country = command.Request.Country;
         movie.Language = command.Request.Language;

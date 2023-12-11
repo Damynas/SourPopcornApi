@@ -21,6 +21,7 @@ public class CreateMovieCommandHandler(IDirectorRepository directorRepository, I
         {
             DirectorId = director.Id,
             Title = command.Request.Title,
+            PosterLink = command.Request.PosterLink,
             Description = command.Request.Description,
             Country = command.Request.Country,
             Language = command.Request.Language,

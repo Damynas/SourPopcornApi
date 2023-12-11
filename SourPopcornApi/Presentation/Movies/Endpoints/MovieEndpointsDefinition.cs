@@ -110,7 +110,7 @@ public static class MovieEndpointsDefinition
         [FromBody] CreateMovieRequestBody requestBody, CancellationToken cancellationToken = default)
     {
         var request = new CreateMovieRequest(
-            requestBody.DirectorId, requestBody.Title, requestBody.Description, requestBody.Country, requestBody.Language, DateTime.Parse(requestBody.ReleasedOn, CultureInfo.InvariantCulture, DateTimeStyles.None), requestBody.Writers, requestBody.Actors);
+            requestBody.DirectorId, requestBody.Title, requestBody.PosterLink ?? string.Empty, requestBody.Description, requestBody.Country, requestBody.Language, DateTime.Parse(requestBody.ReleasedOn, CultureInfo.InvariantCulture, DateTimeStyles.None), requestBody.Writers, requestBody.Actors);
         var result = await movieService.CreateMovieAsync(request, cancellationToken);
         if (result.IsFailure)
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");
@@ -130,7 +130,7 @@ public static class MovieEndpointsDefinition
         [FromRoute] int movieId, [FromBody] UpdateMovieRequestBody requestBody, CancellationToken cancellationToken = default)
     {
         var request = new UpdateMovieRequest(
-            movieId, requestBody.DirectorId, requestBody.Title, requestBody.Description, requestBody.Country, requestBody.Language, DateTime.Parse(requestBody.ReleasedOn, CultureInfo.InvariantCulture, DateTimeStyles.None), requestBody.Writers, requestBody.Actors);
+            movieId, requestBody.DirectorId, requestBody.Title, requestBody.PosterLink ?? string.Empty, requestBody.Description, requestBody.Country, requestBody.Language, DateTime.Parse(requestBody.ReleasedOn, CultureInfo.InvariantCulture, DateTimeStyles.None), requestBody.Writers, requestBody.Actors);
         var result = await movieService.UpdateMovieAsync(request, cancellationToken);
         if (result.IsFailure)
             return result.Error.Code == ErrorCode.NullValue ? TypedResults.NotFound(result.Error.Message) : TypedResults.Problem("Failed result error value is incorrect.");

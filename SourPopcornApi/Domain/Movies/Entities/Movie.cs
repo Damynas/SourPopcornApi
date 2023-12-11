@@ -10,6 +10,8 @@ public class Movie(int id, DateTime createdOn, DateTime modifiedOn, bool isDelet
 
     public required string Title { get; set; }
 
+    public required string PosterLink { get; set; }
+
     public required string Description { get; set; }
 
     public required string Country { get; set; }

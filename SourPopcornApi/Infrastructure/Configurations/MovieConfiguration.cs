@@ -22,6 +22,7 @@ internal class MovieConfiguration : IEntityTypeConfiguration<Movie>
 
         builder.Property(m => m.DirectorId).IsRequired().HasColumnName("directorId");
         builder.Property(m => m.Title).IsRequired().HasColumnName("title");
+        builder.Property(m => m.PosterLink).IsRequired().HasColumnName("posterLink");
         builder.Property(m => m.Description).IsRequired().HasColumnName("description");
         builder.Property(m => m.Country).IsRequired().HasColumnName("country");
         builder.Property(m => m.Language).IsRequired().HasColumnName("language");

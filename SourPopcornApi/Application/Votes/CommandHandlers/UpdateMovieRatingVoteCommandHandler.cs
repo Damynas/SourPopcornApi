@@ -26,7 +26,7 @@ public class UpdateMovieRatingVoteCommandHandler(IMovieRepository movieRepositor
         if (vote is null)
             return Result<Vote?>.Failure(null, Error.NullValue("Specified vote does not exist for specified rating."));
 
-        if (command.Request.UserId != rating.CreatorId && !command.Request.Roles.Contains(Role.Moderator))
+        if (command.Request.UserId != vote.CreatorId && !command.Request.Roles.Contains(Role.Moderator))
             return Result<Vote?>.Failure(null, Error.Forbidden("You are not allowed to update another user's vote."));
 
         vote.ModifiedOn = DateTime.UtcNow;
